@@ -1,10 +1,10 @@
 const db = require('../../db');
-const { v4: uuidv4 } = require('uuid');
+const idGenerator = require('../utils/idGenerator');
 
 exports.getAllCustomers = async (req, res) => {
     try {
         const [rows] = await db.query(
-            'SELECT * FROM customers ORDER BY created_at DESC'
+            'SELECT * FROM customers ORDER BY id DESC'
         );
         res.json(rows);
     } catch (err) {
@@ -33,7 +33,7 @@ exports.createCustomer = async (req, res) => {
     try {
         const { name, phone, email, address } = req.body;
 
-        const id = uuidv4();
+        const id = idGenerator.customerId();
 
         await db.query(
             `INSERT INTO customers (id, name, phone, email, address)

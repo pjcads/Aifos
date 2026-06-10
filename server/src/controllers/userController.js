@@ -1,6 +1,6 @@
 const db = require('../../db');
 const bcrypt = require('bcryptjs');
-const { v4: uuidv4 } = require('uuid');
+const idGenerator = require('../utils/idGenerator');
 
 /**
  * GET ALL USERS (exclude passwords)
@@ -43,7 +43,7 @@ exports.createUser = async (req, res) => {
     try {
         const { username, password, role } = req.body;
 
-        const id = uuidv4();
+        const id = idGenerator.userId();
         const hashedPassword = await bcrypt.hash(password, 10);
 
         await db.query(

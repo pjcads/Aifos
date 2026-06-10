@@ -1,5 +1,5 @@
 const db = require('../../db');
-const { v4: uuidv4 } = require('uuid');
+const idGenerator = require('../utils/idGenerator');
 
 exports.getAllProducts = async (req, res) => {
     const [rows] = await db.query('SELECT * FROM products');
@@ -14,7 +14,7 @@ exports.getProductById = async (req, res) => {
 exports.createProduct = async (req, res) => {
     const { name, price, stock_quantity } = req.body;
 
-    const id = uuidv4();
+    const id = idGenerator.productId();
 
     await db.query(
         `INSERT INTO products (id, name, price, stock_quantity)

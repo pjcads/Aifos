@@ -7,6 +7,7 @@ const authRoutes = require('./src/routes/authRoutes');
 const productRoutes = require('./src/routes/productRoutes');
 const customerRoutes = require('./src/routes/customerRoutes');
 const userRoutes = require('./src/routes/userRoutes');
+const inventoryRoutes = require('./src/routes/inventoryRoutes');
 
 const authMiddleware = require('./src/middleware/authMiddleware');
 const roleMiddleware = require('./src/middleware/roleMiddleware');
@@ -23,6 +24,13 @@ app.use(express.json());
  */
 app.use('/api/auth', authRoutes);
 
+app.get('/health', (req, res) => {
+    res.status(200).json({
+        status: 'OK',
+        timestamp: new Date().toISOString()
+    });
+});
+
 /**
  * =========================
  * PROTECTED ROUTES
@@ -38,6 +46,13 @@ app.use(
   authMiddleware,
   roleMiddleware('MANAGER', 'ADMIN'),
   productRoutes
+);
+
+app.use(
+  '/api/inventory',
+  authMiddleware,
+  roleMiddleware('ADMIN', 'MANAGER'),
+  inventoryRoutes
 );
 
 // Users: ONLY super admin
