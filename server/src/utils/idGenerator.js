@@ -13,5 +13,11 @@ module.exports = {
 
     inventoryDocumentId: () => `DOC${ulid()}`,
 
-    cashierSessionId: () => `SES${ulid()}`
+    cashierSessionId: () => `SES${ulid()}`,
+
+    creditTransactionId: () => `CRT${ulid()}`,
+    payrollBatchId: () => `PAY${ulid()}`,
+    payrollBatchDetailId: () => `PDT${ulid()}`,    
+
+    negativeInventoryApprovalId: () => `NIA${ulid()}`,
 };

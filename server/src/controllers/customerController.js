@@ -1,5 +1,7 @@
 const db = require('../../db');
 const idGenerator = require('../utils/idGenerator');
+const customerUtils = require('../utils/customerUtils');
+const creditService = require('../services/creditService');
 
 exports.getAllCustomers = async (req, res) => {
     try {
@@ -23,7 +25,10 @@ exports.getCustomerById = async (req, res) => {
             return res.status(404).json({ error: 'Customer not found' });
         }
 
-        res.json(rows[0]);
+        const customer = customerUtils.calculateAvailableCredit(rows[0]);
+
+        res.json(customer);        
+
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
@@ -80,5 +85,66 @@ exports.deleteCustomer = async (req, res) => {
 
     } catch (err) {
         res.status(500).json({ error: err.message });
+    }
+};
+
+exports.getCustomerByBarcode = async (req, res) => {
+
+    try {
+
+        const [rows] = await db.query(
+            `
+            SELECT *
+            FROM customers
+            WHERE barcode = ?
+            `,
+            [req.params.barcode]
+        );
+
+        if (rows.length === 0) {
+            return res.status(404).json({
+                error: 'Customer not found'
+            });
+        }
+
+        const customer = customerUtils.calculateAvailableCredit(rows[0]);
+
+        res.json(customer);
+
+    } catch (err) {
+
+        res.status(500).json({
+            error: err.message
+        });
+
+    }
+};
+
+exports.consumeCredit = async (req, res) => {
+
+    try {
+
+        const { amount, remarks } = req.body;
+
+        const transactionId =
+            await creditService.consumeCredit(
+                req.params.id,
+                amount,
+                null,
+                remarks,
+                req.user.id
+            );
+
+        res.json({
+            success: true,
+            transactionId
+        });
+
+    } catch (err) {
+
+        res.status(400).json({
+            error: err.message
+        });
+
     }
 };

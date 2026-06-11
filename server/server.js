@@ -8,6 +8,8 @@ const productRoutes = require('./src/routes/productRoutes');
 const customerRoutes = require('./src/routes/customerRoutes');
 const userRoutes = require('./src/routes/userRoutes');
 const inventoryRoutes = require('./src/routes/inventoryRoutes');
+const payrollRoutes = require('./src/routes/payrollRoutes');
+const checkoutRoutes = require('./src/routes/checkoutRoutes');
 
 const authMiddleware = require('./src/middleware/authMiddleware');
 const roleMiddleware = require('./src/middleware/roleMiddleware');
@@ -40,6 +42,8 @@ app.get('/health', (req, res) => {
 // Customers: any logged-in user
 app.use('/api/customers', authMiddleware, customerRoutes);
 
+app.use('/api/checkout', authMiddleware, checkoutRoutes);
+
 // Products: manager + super admin
 app.use(
   '/api/products',
@@ -53,6 +57,13 @@ app.use(
   authMiddleware,
   roleMiddleware('ADMIN', 'MANAGER'),
   inventoryRoutes
+);
+
+app.use(
+    '/api/payroll',
+    authMiddleware,
+    roleMiddleware('ADMIN','MANAGER'),
+    payrollRoutes
 );
 
 // Users: ONLY super admin
