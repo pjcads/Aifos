@@ -10,6 +10,14 @@ const userRoutes = require('./src/routes/userRoutes');
 const inventoryRoutes = require('./src/routes/inventoryRoutes');
 const payrollRoutes = require('./src/routes/payrollRoutes');
 const checkoutRoutes = require('./src/routes/checkoutRoutes');
+const refundRoutes = require('./src/routes/refundRoutes');
+const reconciliationRoutes = require('./src/routes/reconciliationRoutes');
+const goodsReceiptRoutes = require('./src/routes/goodsReceiptRoutes');
+const walletRoutes = require('./src/routes/walletRoutes');
+const cashierSessionRoutes = require('./src/routes/cashierSessionRoutes');
+const transactionRoutes = require('./src/routes/transactionRoutes');
+const customerInquiryRoutes = require('./src/routes/customerInquiryRoutes');
+const orderRoutes = require('./src/routes/orderRoutes');
 
 const authMiddleware = require('./src/middleware/authMiddleware');
 const roleMiddleware = require('./src/middleware/roleMiddleware');
@@ -33,6 +41,30 @@ app.get('/health', (req, res) => {
     });
 });
 
+app.use(
+    '/api/sessions',
+    authMiddleware,
+    cashierSessionRoutes
+);
+
+app.use(
+    '/api/transactions',
+    authMiddleware,
+    transactionRoutes
+);
+
+app.use(
+    '/api/customer-inquiry',
+    authMiddleware,
+    customerInquiryRoutes
+);
+
+app.use(
+    '/api/orders',
+    authMiddleware,
+    orderRoutes
+);
+
 /**
  * =========================
  * PROTECTED ROUTES
@@ -42,7 +74,15 @@ app.get('/health', (req, res) => {
 // Customers: any logged-in user
 app.use('/api/customers', authMiddleware, customerRoutes);
 
-app.use('/api/checkout', authMiddleware, checkoutRoutes);
+app.use(
+    '/api/checkout',
+    authMiddleware,
+    roleMiddleware(
+        'ADMIN',
+        'MANAGER'
+    ),
+    checkoutRoutes
+);
 
 // Products: manager + super admin
 app.use(
@@ -53,6 +93,19 @@ app.use(
 );
 
 app.use(
+    '/api/payroll',
+    authMiddleware,
+    roleMiddleware('ADMIN','MANAGER'),
+    payrollRoutes
+);
+
+app.use('/api/refunds',
+    authMiddleware,
+    roleMiddleware('ADMIN','MANAGER'),
+    refundRoutes
+);
+
+app.use(
   '/api/inventory',
   authMiddleware,
   roleMiddleware('ADMIN', 'MANAGER'),
@@ -60,10 +113,33 @@ app.use(
 );
 
 app.use(
-    '/api/payroll',
+    '/api/reconciliations',
     authMiddleware,
-    roleMiddleware('ADMIN','MANAGER'),
-    payrollRoutes
+    roleMiddleware(
+        'ADMIN',
+        'MANAGER'
+    ),
+    reconciliationRoutes
+);    
+
+app.use(
+    '/api/goods-receipts',
+    authMiddleware,
+    roleMiddleware(
+        'ADMIN',
+        'MANAGER'
+    ),
+    goodsReceiptRoutes
+);
+
+app.use(
+    '/api/wallets',
+    authMiddleware,
+    roleMiddleware(
+        'ADMIN',
+        'MANAGER'
+    ),
+    walletRoutes
 );
 
 // Users: ONLY super admin

@@ -20,4 +20,18 @@ module.exports = {
     payrollBatchDetailId: () => `PDT${ulid()}`,    
 
     negativeInventoryApprovalId: () => `NIA${ulid()}`,
+
+    inventoryReconciliationId: () => `REC${ulid()}`,
+
+    goodsReceiptId: () => `GRH${ulid()}`,
+    goodsReceiptLineId: () => `GRL${ulid()}`,
+
+    walletAccountId: () => `WAL${ulid()}`,
+    walletTransactionId: () => `WTX${ulid()}`,
+    walletBarcodeId: () => `WBC${ulid()}`,
+
+    cashierSessionId: () => `SES${ulid()}`,
+
+    orderId: () => `ORD${ulid()}`,
+    orderLineId: () => `ODL${ulid()}`,
 };

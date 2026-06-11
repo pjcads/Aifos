@@ -186,6 +186,74 @@ class CreditService {
         );
 
         return transactionId;
+    }  
+    
+    async refundCreditInTransaction(
+        connection,
+        customerId,
+        amount,
+        refundTransactionId,
+        originalTransactionId,
+        remarks,
+        userId
+    ) {
+
+        const transactionId =
+            idGenerator.creditTransactionId();
+
+        await connection.query(
+            `
+            INSERT INTO
+            customer_credit_transactions
+            (
+                id,
+                customer_id,
+                transaction_type,
+                amount,
+                reference_id,
+                original_transaction_id,
+                remarks,
+                created_by
+            )
+            VALUES
+            (
+                ?,
+                ?,
+                'REFUND',
+                ?,
+                ?,
+                ?,
+                ?,
+                ?
+            )
+            `,
+            [
+                transactionId,
+                customerId,
+                amount * -1,
+                refundTransactionId,
+                originalTransactionId,
+                remarks,
+                userId
+            ]
+        );
+
+        await connection.query(
+            `
+            UPDATE customers
+            SET current_cycle_used_credit =
+                GREATEST(
+                    0,
+                    current_cycle_used_credit - ?
+                )
+            WHERE id = ?
+            `,
+            [
+                amount,
+                customerId
+            ]
+        );
+
     }    
 }
 

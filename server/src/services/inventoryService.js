@@ -92,12 +92,86 @@ class InventoryService {
 
         } else {
 
+            const [result] =
+                await connection.query(
+                    `
+                    UPDATE inventory_balances
+                    SET
+                        quantity_on_hand =
+                            quantity_on_hand - ?,
+                        last_updated = NOW()
+                    WHERE product_id = ?
+                    `,
+                    [
+                        quantity,
+                        productId
+                    ]
+                );
+
+            if (
+                result.affectedRows === 0
+            ) {
+
+                throw new Error(
+                    `Inventory balance record not found for product ${productId}`
+                );
+
+            }
+        }
+
+        return movementId;
+    }
+
+    async refundInventoryInTransaction(
+        connection,
+        productId,
+        quantity,
+        referenceId,
+        userId
+    ) {
+
+        const movementId =
+            idGenerator.inventoryMovementId();
+
+        await connection.query(
+            `
+            INSERT INTO inventory_movements
+            (
+                id,
+                product_id,
+                movement_type,
+                quantity_change,
+                reference_id,
+                remarks,
+                created_by,
+                movement_datetime
+            )
+            VALUES
+            (
+                ?, ?,
+                'REFUND',
+                ?,
+                ?, ?, ?,
+                NOW()
+            )
+            `,
+            [
+                movementId,
+                productId,
+                quantity,
+                referenceId,
+                'POS Refund',
+                userId
+            ]
+        );
+
+        const [result] =
             await connection.query(
                 `
                 UPDATE inventory_balances
                 SET
                     quantity_on_hand =
-                        quantity_on_hand - ?,
+                        quantity_on_hand + ?,
                     last_updated = NOW()
                 WHERE product_id = ?
                 `,
@@ -106,10 +180,17 @@ class InventoryService {
                     productId
                 ]
             );
-        }
 
-        return movementId;
-    }
+        if (
+            result.affectedRows === 0
+        ) {
+
+            throw new Error(
+                `Inventory balance record not found for product ${productId}`
+            );
+
+        }
+    }    
 }
 
 module.exports = new InventoryService();

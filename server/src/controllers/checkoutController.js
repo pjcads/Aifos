@@ -7,8 +7,14 @@ exports.createSale = async (req, res) => {
         const result =
             await checkoutService.createSale({
 
+                paymentMethod:
+                    req.body.paymentMethod,
+
                 customerId:
                     req.body.customerId,
+
+                walletBarcode:
+                    req.body.walletBarcode,
 
                 items:
                     req.body.items,

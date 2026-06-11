@@ -4,16 +4,22 @@ const idGenerator = require('../utils/idGenerator');
 const priceService = require('./priceService');
 const inventoryService = require('./inventoryService');
 const negativeInventoryApprovalService = require('./negativeInventoryApprovalService');
+const numberGeneratorService = require('./numberGeneratorService');
+const walletService = require('./walletService');
+const cashierSessionService = require('./cashierSessionService');
 
 class CheckoutService {
 
         async createSale({
-            customerId,
+            paymentMethod,
+            customerId = null,
+            walletBarcode = null,
             items,
             cashierId,
             terminalId,
-            negativeInventoryApprovalId = null
-        })    {
+            negativeInventoryApprovalId = null,
+            amountTendered = null
+        })   {
 
         const connection =
             await db.getConnection();
@@ -21,6 +27,39 @@ class CheckoutService {
         try {
 
             await connection.beginTransaction();
+
+            /**
+             * ====================================
+             * VALIDATE ACTIVE SESSION
+             * ====================================
+             */
+            const activeSession =
+                await cashierSessionService
+                    .getActiveSession(
+                        terminalId
+                    );
+
+            if (!activeSession) {
+
+                throw new Error(
+                    `No active cashier session for terminal ${terminalId}`
+                );
+
+            }
+
+            if (
+                ![
+                    'CUSTOMER_CREDIT',
+                    'XEMCO_WALLET',
+                    'CASH'
+                ].includes(paymentMethod)
+            ) {
+
+                throw new Error(
+                    'Invalid payment method'
+                );
+
+            }            
 
             let subtotal = 0;
 
@@ -34,6 +73,12 @@ class CheckoutService {
             const productIds =
                 items.map(x => x.productId);
 
+            /*
+            * Missing inventory balance
+            * is treated as zero inventory.
+            * inventoryService will create
+            * the balance row if needed.
+            */                    
             const [productRows] =
                 await connection.query(
                     `
@@ -147,14 +192,95 @@ class CheckoutService {
 
             /**
              * ====================================
+             * VALIDATE PAYMENT
+             * ====================================
+             */
+            if (
+                paymentMethod === 'CUSTOMER_CREDIT'
+            ) {
+
+                if (!customerId) {
+
+                    throw new Error(
+                        'Customer is required for credit sales'
+                    );
+
+                }
+
+            }
+            else if (
+                paymentMethod === 'XEMCO_WALLET'
+            ) {
+
+                if (!walletBarcode) {
+
+                    throw new Error(
+                        'Wallet barcode is required'
+                    );
+
+                }
+
+                await walletService
+                    .validateWalletBalance(
+                        walletBarcode,
+                        subtotal
+                    );
+
+            }
+            else if (
+                paymentMethod === 'CASH'
+            ) {
+
+                if (
+                    amountTendered === null
+                ) {
+
+                    throw new Error(
+                        'Amount tendered is required'
+                    );
+
+                }
+
+                if (
+                    Number(amountTendered)
+                    <
+                    Number(subtotal)
+                ) {
+
+                    throw new Error(
+                        'Insufficient cash tendered'
+                    );
+
+                }
+
+            }            
+
+            /**
+             * ====================================
              * CREATE HEADER
              * ====================================
              */
+
+            let changeAmount = null;
+
+            if (
+                paymentMethod ===
+                'CASH'
+            ) {
+
+                changeAmount =
+                    Number(amountTendered)
+                    -
+                    Number(subtotal);
+
+            }
+
             const transactionId =
                 idGenerator.transactionId();
 
             const transactionNo =
-                `TXN-${Date.now()}`;
+                await numberGeneratorService
+                    .generateTransactionNo();
 
             await connection.query(
                 `
@@ -170,24 +296,31 @@ class CheckoutService {
                     transaction_datetime,
                     terminal_id,
                     cashier_id,
-                    sync_status
+                    sync_status,
+                    session_id,
+                    amount_tendered,
+                    change_amount                    
                 )
                 VALUES
                 (
                     ?, ?, 'SALE',
-                    'CUSTOMER_CREDIT',
+                    ?,
                     ?, ?, ?, NOW(),
-                    ?, ?, 'SYNCED'
+                    ?, ?, 'SYNCED', ?, ?, ?
                 )
                 `,
                 [
                     transactionId,
                     transactionNo,
+                    paymentMethod,
                     customerId,
                     subtotal,
                     subtotal,
                     terminalId,
-                    cashierId
+                    cashierId,
+                    activeSession.id,
+                    amountTendered,
+                    changeAmount                    
                 ]
             );
 
@@ -256,23 +389,45 @@ class CheckoutService {
              * CONSUME CREDIT
              * ====================================
              */
-            await creditService
-                .consumeCreditInTransaction(
-                    connection,
-                    customerId,
-                    subtotal,
-                    transactionId,
-                    'POS Sale',
-                    cashierId
-                );
+            if (
+                paymentMethod ===
+                'CUSTOMER_CREDIT'
+            ) {
+
+                await creditService
+                    .consumeCreditInTransaction(
+                        connection,
+                        customerId,
+                        subtotal,
+                        transactionId,
+                        'POS Sale',
+                        cashierId
+                    );
+
+            }
+            else if (
+                paymentMethod ===
+                'XEMCO_WALLET'
+            ) {
+
+                await walletService
+                    .consumeWalletInTransaction(
+                        connection,
+                        walletBarcode,
+                        subtotal,
+                        transactionId,
+                        'POS Sale',
+                        cashierId
+                    );
+
+            }
 
             await connection.commit();
 
             return {
                 transactionId,
                 transactionNo,
-                totalAmount:
-                    subtotal
+                totalAmount: subtotal
             };
 
         } catch (err) {
