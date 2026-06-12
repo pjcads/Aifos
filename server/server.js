@@ -20,6 +20,8 @@ const customerInquiryRoutes = require('./src/routes/customerInquiryRoutes');
 const orderRoutes = require('./src/routes/orderRoutes');
 const dashboardRoutes = require('./src/routes/dashboardRoutes');
 const reportRoutes = require('./src/routes/reportRoutes');
+const syncRoutes = require('./src/routes/syncRoutes');
+const terminalRoutes = require('./src/routes/terminalRoutes');
 
 const authMiddleware = require('./src/middleware/authMiddleware');
 const roleMiddleware = require('./src/middleware/roleMiddleware');
@@ -71,6 +73,12 @@ app.use(
     '/api/dashboard',
     authMiddleware,
     dashboardRoutes
+);
+
+app.use(
+    '/api/sync',
+    authMiddleware,
+    syncRoutes
 );
 
 /**
@@ -143,6 +151,13 @@ app.use(
     authMiddleware,
     roleMiddleware('ADMIN','MANAGER'),
     reportRoutes
+);
+
+app.use(
+    '/api/terminals',
+    authMiddleware,
+    roleMiddleware('ADMIN','MANAGER'),
+    terminalRoutes
 );
 
 // Users: ONLY super admin

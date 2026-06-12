@@ -4,7 +4,7 @@ module.exports = {
     customerId: () => `CUS${ulid()}`,
     productId: () => `PRD${ulid()}`,
     userId: () => `USR${ulid()}`,
-    terminalId: () => `POS${ulid()}`,
+    terminalId: () => `TER${ulid()}`,
 
     transactionId: () => `TRN${ulid()}`,
     transactionLineId: () => `TLN${ulid()}`,
@@ -29,8 +29,6 @@ module.exports = {
     walletAccountId: () => `WAL${ulid()}`,
     walletTransactionId: () => `WTX${ulid()}`,
     walletBarcodeId: () => `WBC${ulid()}`,
-
-    cashierSessionId: () => `SES${ulid()}`,
 
     orderId: () => `ORD${ulid()}`,
     orderLineId: () => `ODL${ulid()}`,
