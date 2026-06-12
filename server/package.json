@@ -1,14 +1,14 @@
 {
-  "name": "server",
+  "name": "aifos-core",
   "version": "1.0.0",
-  "main": "index.js",
+
+  "main": "server.js",
+  "bin": "server.js",
+
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node server.js"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "description": "",
+
   "dependencies": {
     "bcryptjs": "^3.0.3",
     "cors": "^2.8.6",
@@ -17,5 +17,17 @@
     "mysql2": "^3.22.3",
     "ulid": "^3.0.2",
     "uuid": "^14.0.0"
+  },
+
+  "devDependencies": {
+    "pkg": "^5.8.1"
+  },
+
+  "pkg": {
+    "assets": [
+      "appsettings.json",
+      "database/**/*",
+      "backups/**/*"
+    ]
   }
 }
