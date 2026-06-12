@@ -1,5 +1,4 @@
-const cashierSessionService =
-    require('../services/cashierSessionService');
+const cashierSessionService = require('../services/cashierSessionService');
 
 exports.openSession =
     async (req, res) => {
@@ -114,6 +113,34 @@ exports.getSessionSummary =
             res.status(400).json({
                 success: false,
                 error: err.message
+            });
+
+        }
+
+    };    
+
+exports.getSessionReport =
+    async (req, res) => {
+
+        try {
+
+            const report =
+                await cashierSessionService
+                    .getSessionReport(
+                        req.params.sessionId
+                    );
+
+            res.json({
+                success: true,
+                report
+            });
+
+        } catch (err) {
+
+            res.status(400).json({
+                success: false,
+                error:
+                    err.message
             });
 
         }

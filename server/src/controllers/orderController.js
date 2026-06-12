@@ -1,5 +1,4 @@
-const orderService =
-    require('../services/orderService');
+const orderService = require('../services/orderService');
 
 exports.createOrder =
     async (req, res) => {
@@ -139,6 +138,105 @@ exports.releaseOrder =
                             req.body.amountTendered,
 
                         releasedBy:
+                            req.user.id
+
+                    });
+
+            res.json({
+                success: true,
+                ...result
+            });
+
+        } catch (err) {
+
+            res.status(400).json({
+                success: false,
+                error:
+                    err.message
+            });
+
+        }
+
+    };
+    
+exports.cancelOrder =
+    async (req, res) => {
+
+        try {
+
+            const result =
+                await orderService
+                    .cancelOrder(
+                        req.params.orderId
+                    );
+
+            res.json({
+                success: true,
+                ...result
+            });
+
+        } catch (err) {
+
+            res.status(400).json({
+                success: false,
+                error:
+                    err.message
+            });
+
+        }
+
+    };    
+
+exports.getOrdersByStatus =
+    async (req, res) => {
+
+        try {
+
+            const rows =
+                await orderService
+                    .getOrdersByStatus(
+                        req.params.status
+                    );
+
+            res.json({
+                success: true,
+                orders: rows
+            });
+
+        } catch (err) {
+
+            res.status(400).json({
+                success: false,
+                error:
+                    err.message
+            });
+
+        }
+
+    };  
+    
+exports.createOrderByBarcode =
+    async (req, res) => {
+
+        try {
+
+            const result =
+                await orderService
+                    .createOrderByBarcode({
+
+                        barcode:
+                            req.body.barcode,
+
+                        paymentMethod:
+                            req.body.paymentMethod,
+
+                        items:
+                            req.body.items,
+
+                        remarks:
+                            req.body.remarks,
+
+                        createdBy:
                             req.user.id
 
                     });

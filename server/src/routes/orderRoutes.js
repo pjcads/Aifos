@@ -16,6 +16,11 @@ router.get(
 );
 
 router.get(
+    '/status/:status',
+    controller.getOrdersByStatus
+);
+
+router.get(
     '/:orderId',
     controller.getOrder
 );
@@ -28,6 +33,16 @@ router.patch(
 router.post(
     '/:orderId/release',
     controller.releaseOrder
+);
+
+router.post(
+    '/:orderId/cancel',
+    controller.cancelOrder
+);
+
+router.post(
+    '/barcode',
+    controller.createOrderByBarcode
 );
 
 module.exports = router;

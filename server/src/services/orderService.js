@@ -3,6 +3,7 @@ const idGenerator = require('../utils/idGenerator');
 const priceService = require('./priceService');
 const numberGeneratorService = require('./numberGeneratorService');
 const checkoutService = require('./checkoutService');
+const cashierSessionService = require('./cashierSessionService');
 
 class OrderService {
 
@@ -450,8 +451,27 @@ class OrderService {
                 headerRows[0];
 
             if (
-                order.status !==
-                'READY'
+                order.status === 'RELEASED'
+            ) {
+
+                throw new Error(
+                    'Order already released'
+                );
+
+            }
+
+            if (
+                order.status === 'CANCELLED'
+            ) {
+
+                throw new Error(
+                    'Cancelled order cannot be released'
+                );
+
+            }            
+
+            if (
+                order.status !== 'READY'
             ) {
 
                 throw new Error(
@@ -511,17 +531,25 @@ class OrderService {
 
                     });
 
+            const activeSession =
+                await cashierSessionService
+                    .getOpenSessionByTerminal(
+                        terminalId
+                    );
+
             await db.query(
                 `
                 UPDATE order_headers
                 SET
                     status = 'RELEASED',
+                    session_id = ?,
                     released_transaction_id = ?,
                     released_at = NOW(),
                     released_by = ?
                 WHERE id = ?
                 `,
                 [
+                    activeSession.id,
                     sale.transactionId,
                     releasedBy,
                     orderId
@@ -555,6 +583,146 @@ class OrderService {
         }
 
     }    
+
+    async cancelOrder(
+        orderId
+    ) {
+
+        const [rows] =
+            await db.query(
+                `
+                SELECT *
+                FROM order_headers
+                WHERE id = ?
+                `,
+                [orderId]
+            );
+
+        if (
+            rows.length === 0
+        ) {
+
+            throw new Error(
+                'Order not found'
+            );
+
+        }
+
+        const order =
+            rows[0];
+
+        if (
+            [
+                'RELEASED',
+                'CANCELLED'
+            ].includes(
+                order.status
+            )
+        ) {
+
+            throw new Error(
+                `Cannot cancel ${order.status} order`
+            );
+
+        }
+
+        await db.query(
+            `
+            UPDATE order_headers
+            SET status = 'CANCELLED'
+            WHERE id = ?
+            `,
+            [orderId]
+        );
+
+        return {
+            orderId,
+            previousStatus:
+                order.status,
+            currentStatus:
+                'CANCELLED'
+        };
+
+    }
+
+    async getOrdersByStatus(
+        status
+    ) {
+
+        const [rows] =
+            await db.query(
+                `
+                SELECT *
+                FROM order_headers
+                WHERE status = ?
+                ORDER BY
+                    created_at DESC
+                `,
+                [status]
+            );
+
+        return rows;
+
+    }    
+
+    async createOrderByBarcode({
+        barcode,
+        paymentMethod,
+        items,
+        remarks = null,
+        createdBy = null
+    }) {
+
+        const [rows] =
+            await db.query(
+                `
+                SELECT
+                    w.customer_id
+                FROM wallet_account_barcodes wb
+                INNER JOIN wallet_accounts w
+                    ON w.id = wb.wallet_id
+                WHERE wb.barcode = ?
+                AND wb.is_active = 1
+                `,
+                [barcode]
+            );
+
+        if (
+            rows.length === 0
+        ) {
+
+            throw new Error(
+                'Barcode not found'
+            );
+
+        }
+
+        if (
+            !rows[0].customer_id
+        ) {
+
+            throw new Error(
+                'Barcode is not linked to a customer'
+            );
+
+        }
+
+        return await this.createOrder({
+
+            customerId:
+                rows[0].customer_id,
+
+            paymentMethod,
+
+            items,
+
+            remarks,
+
+            createdBy
+
+        });
+
+    }
 
 }
 

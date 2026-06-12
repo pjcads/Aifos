@@ -18,6 +18,8 @@ const cashierSessionRoutes = require('./src/routes/cashierSessionRoutes');
 const transactionRoutes = require('./src/routes/transactionRoutes');
 const customerInquiryRoutes = require('./src/routes/customerInquiryRoutes');
 const orderRoutes = require('./src/routes/orderRoutes');
+const dashboardRoutes = require('./src/routes/dashboardRoutes');
+const reportRoutes = require('./src/routes/reportRoutes');
 
 const authMiddleware = require('./src/middleware/authMiddleware');
 const roleMiddleware = require('./src/middleware/roleMiddleware');
@@ -65,6 +67,12 @@ app.use(
     orderRoutes
 );
 
+app.use(
+    '/api/dashboard',
+    authMiddleware,
+    dashboardRoutes
+);
+
 /**
  * =========================
  * PROTECTED ROUTES
@@ -77,10 +85,7 @@ app.use('/api/customers', authMiddleware, customerRoutes);
 app.use(
     '/api/checkout',
     authMiddleware,
-    roleMiddleware(
-        'ADMIN',
-        'MANAGER'
-    ),
+    roleMiddleware('ADMIN','MANAGER'),
     checkoutRoutes
 );
 
@@ -115,31 +120,29 @@ app.use(
 app.use(
     '/api/reconciliations',
     authMiddleware,
-    roleMiddleware(
-        'ADMIN',
-        'MANAGER'
-    ),
+    roleMiddleware('ADMIN','MANAGER'),
     reconciliationRoutes
 );    
 
 app.use(
     '/api/goods-receipts',
     authMiddleware,
-    roleMiddleware(
-        'ADMIN',
-        'MANAGER'
-    ),
+    roleMiddleware('ADMIN','MANAGER'),
     goodsReceiptRoutes
 );
 
 app.use(
     '/api/wallets',
     authMiddleware,
-    roleMiddleware(
-        'ADMIN',
-        'MANAGER'
-    ),
+    roleMiddleware('ADMIN','MANAGER'),
     walletRoutes
+);
+
+app.use(
+    '/api/reports',
+    authMiddleware,
+    roleMiddleware('ADMIN','MANAGER'),
+    reportRoutes
 );
 
 // Users: ONLY super admin

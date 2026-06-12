@@ -296,8 +296,8 @@ class CheckoutService {
                     transaction_datetime,
                     terminal_id,
                     cashier_id,
-                    sync_status,
                     session_id,
+                    sync_status,
                     amount_tendered,
                     change_amount                    
                 )
@@ -306,7 +306,7 @@ class CheckoutService {
                     ?, ?, 'SALE',
                     ?,
                     ?, ?, ?, NOW(),
-                    ?, ?, 'SYNCED', ?, ?, ?
+                    ?, ?, ?, 'SYNCED', ?, ?
                 )
                 `,
                 [

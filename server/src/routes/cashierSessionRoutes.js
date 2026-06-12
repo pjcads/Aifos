@@ -21,6 +21,11 @@ router.get(
 );
 
 router.get(
+    '/:sessionId/report',
+    controller.getSessionReport
+);
+
+router.get(
     '/:sessionId/summary',
     controller.getSessionSummary
 );
