@@ -1,7 +1,9 @@
 const jwt = require('jsonwebtoken');
 const db = require('../../db');
 
-const JWT_SECRET = process.env.JWT_SECRET;
+const config = require('../config/config');
+
+const JWT_SECRET = config.Jwt.Secret;
 
 exports.login = async (req, res) => {
     const { username, password } = req.body;

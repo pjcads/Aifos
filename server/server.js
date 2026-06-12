@@ -1,4 +1,8 @@
-require('dotenv').config();
+const config = require('./src/config/config');
+
+console.log(
+    config.CompanyName
+);
 
 const express = require('express');
 const cors = require('cors');
@@ -168,7 +172,7 @@ app.use(
   userRoutes
 );
 
-const PORT = process.env.PORT || 5000;
+const PORT = config.Api.Port;
 
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 Server running on port ${PORT}`);
