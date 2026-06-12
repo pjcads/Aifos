@@ -18,3 +18,21 @@ WHERE NOT EXISTS
     FROM users
     WHERE username = 'admin'
 );
+
+INSERT INTO system_information
+(
+    id,
+    company_name,
+    installed_version,
+    installed_at
+)
+SELECT
+    'SYS000000000000000000000000001',
+    '__COMPANY_NAME__',
+    '__VERSION__',
+    NOW()
+WHERE NOT EXISTS
+(
+    SELECT 1
+    FROM system_information
+);

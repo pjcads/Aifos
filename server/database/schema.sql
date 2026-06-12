@@ -366,4 +366,16 @@ CREATE TABLE `wallet_transactions` (
   CONSTRAINT `fk_wallet_txn_wallet` FOREIGN KEY (`wallet_id`) REFERENCES `wallet_accounts` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
+CREATE TABLE IF NOT EXISTS system_information
+(
+    id VARCHAR(30) NOT NULL,
+    company_name VARCHAR(255) NOT NULL,
+    installed_version VARCHAR(20) NOT NULL,
+    installed_at DATETIME NOT NULL,
+    PRIMARY KEY (id)
+)
+ENGINE=InnoDB
+DEFAULT CHARSET=utf8mb4
+COLLATE=utf8mb4_0900_ai_ci;
+
 SET FOREIGN_KEY_CHECKS = 1;

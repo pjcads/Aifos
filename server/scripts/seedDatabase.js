@@ -44,12 +44,24 @@ async function seedDatabase() {
                 '../database/seed.sql'
             );
 
-        const seedSql =
+        let seedSql =
             fs.readFileSync(
                 seedPath,
                 'utf8'
             );
 
+        seedSql =
+            seedSql.replace(
+                '__COMPANY_NAME__',
+                config.CompanyName
+            );
+
+        seedSql =
+            seedSql.replace(
+                '__VERSION__',
+                config.Version
+            );
+            
         console.log(
             'Executing seed.sql...'
         );
