@@ -1,0 +1,16 @@
+ALTER TABLE terminals
+ADD COLUMN last_seen_at DATETIME NULL,
+
+ADD COLUMN app_version VARCHAR(20) NULL,
+
+ADD COLUMN machine_name VARCHAR(100) NULL,
+
+ADD COLUMN ip_address VARCHAR(50) NULL,
+
+ADD COLUMN terminal_status
+ENUM(
+    'ONLINE',
+    'OFFLINE',
+    'DISABLED'
+)
+DEFAULT 'OFFLINE';

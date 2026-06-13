@@ -6,9 +6,18 @@ const router =
 const controller =
     require('../controllers/terminalController');
 
+const terminalAuth =
+    require('../middleware/terminalAuthMiddleware');
+
 router.get(
     '/',
     controller.getTerminals
+);
+
+router.post(
+    '/heartbeat',
+    terminalAuth,
+    controller.heartbeat
 );
 
 router.get(

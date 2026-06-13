@@ -1,0 +1,2 @@
+ALTER TABLE terminals
+ADD COLUMN api_key VARCHAR(100) NULL;

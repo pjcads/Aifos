@@ -110,3 +110,42 @@ exports.updateTerminal =
         }
 
     };
+
+exports.heartbeat =
+    async (req, res) => {
+
+        try {
+
+            const result =
+                await terminalService
+                    .heartbeat({
+
+                        terminalId:
+                            req.terminal.id,
+
+                        appVersion:
+                            req.body.appVersion,
+
+                        machineName:
+                            req.body.machineName,
+
+                        ipAddress:
+                            req.ip
+
+                    });
+
+            res.json({
+                success: true,
+                ...result
+            });
+
+        } catch (err) {
+
+            res.status(400).json({
+                success: false,
+                error: err.message
+            });
+
+        }
+
+    };    
