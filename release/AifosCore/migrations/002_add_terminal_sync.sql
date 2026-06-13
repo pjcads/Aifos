@@ -1,0 +1,3 @@
+ALTER TABLE terminals
+ADD COLUMN sync_enabled TINYINT(1)
+DEFAULT 1;
