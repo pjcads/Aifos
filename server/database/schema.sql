@@ -378,4 +378,15 @@ ENGINE=InnoDB
 DEFAULT CHARSET=utf8mb4
 COLLATE=utf8mb4_0900_ai_ci;
 
+CREATE TABLE IF NOT EXISTS schema_versions
+(
+    version_no VARCHAR(100) NOT NULL,
+    applied_at DATETIME NOT NULL,
+
+    PRIMARY KEY (version_no)
+)
+ENGINE=InnoDB
+DEFAULT CHARSET=utf8mb4
+COLLATE=utf8mb4_0900_ai_ci;
+
 SET FOREIGN_KEY_CHECKS = 1;

@@ -45,7 +45,7 @@ function runScript(scriptName) {
 
 }
 
-async function setupCore() {
+async function upgradeCore() {
 
     try {
 
@@ -55,7 +55,7 @@ async function setupCore() {
         );
 
         console.log(
-            'Aifos Core Setup'
+            'Aifos Core Upgrade'
         );
 
         console.log(
@@ -65,7 +65,7 @@ async function setupCore() {
         console.log('');
 
         console.log(
-            '[1/4] Testing Connection...'
+            '[1/2] Testing Connection...'
         );
 
         await runScript(
@@ -75,17 +75,7 @@ async function setupCore() {
         console.log('');
 
         console.log(
-            '[2/4] Installing Database...'
-        );
-
-        await runScript(
-            'installDatabase.js'
-        );
-
-        console.log('');
-
-        console.log(
-            '[3/4] Running Migrations...'
+            '[2/2] Running Migrations...'
         );
 
         await runScript(
@@ -95,21 +85,11 @@ async function setupCore() {
         console.log('');
 
         console.log(
-            '[4/4] Seeding Database...'
-        );
-
-        await runScript(
-            'seedDatabase.js'
-        );
-
-        console.log('');
-
-        console.log(
             '================================='
         );
 
         console.log(
-            'Aifos Core installation completed.'
+            'Aifos Core upgrade completed.'
         );
 
         console.log(
@@ -123,7 +103,7 @@ async function setupCore() {
         console.error('');
 
         console.error(
-            'Setup failed.'
+            'Upgrade failed.'
         );
 
         console.error(
@@ -136,4 +116,4 @@ async function setupCore() {
 
 }
 
-setupCore();
+upgradeCore();
