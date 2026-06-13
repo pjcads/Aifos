@@ -1,5 +1,5 @@
 {
-  "name": "pos-system",
+  "name": "aifos-core",
   "version": "1.0.0",
   "scripts": {
     "install-server": "npm install --prefix server",
