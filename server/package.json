@@ -17,6 +17,7 @@
     "uuid": "^14.0.0"
   },
   "devDependencies": {
+    "bytenode": "^1.5.7",
     "pkg": "^5.8.1"
   },
   "pkg": {
