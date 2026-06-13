@@ -3,20 +3,21 @@ node_modules/
 **/node_modules/
 
 # Environment files
+.env
+*.env
 .env*
 *.env*
+
+# Release artifacts
+release/
+*.jsc
 
 # Logs
 *.log
 
 # Build output
 dist/
-build/
 
 # OS files
 .DS_Store
 Thumbs.db
-
-# Release artifacts
-release/
-*.jsc

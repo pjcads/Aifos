@@ -1,0 +1,298 @@
+const fs = require('fs');
+const path = require('path');
+const bytenode = require('../server/node_modules/bytenode');
+
+const ROOT =
+    path.join(__dirname, '..');
+
+const SERVER =
+    path.join(ROOT, 'server');
+
+const RELEASE =
+    path.join(
+        ROOT,
+        'release',
+        'AifosCore'
+    );
+
+function cleanRelease() {
+
+    if (fs.existsSync(RELEASE)) {
+
+        fs.rmSync(
+            RELEASE,
+            {
+                recursive: true,
+                force: true
+            }
+        );
+
+    }
+
+    fs.mkdirSync(
+        RELEASE,
+        {
+            recursive: true
+        }
+    );
+
+}
+
+function copyRecursive(src, dest) {
+
+    if (!fs.existsSync(src)) {
+        return;
+    }
+
+    const stat =
+        fs.statSync(src);
+
+    if (stat.isDirectory()) {
+
+        fs.mkdirSync(
+            dest,
+            {
+                recursive: true
+            }
+        );
+
+        for (const item of fs.readdirSync(src)) {
+
+            copyRecursive(
+                path.join(src, item),
+                path.join(dest, item)
+            );
+
+        }
+
+    } else {
+
+        fs.copyFileSync(
+            src,
+            dest
+        );
+
+    }
+
+}
+
+function compileFile(sourceFile, targetFile) {
+
+    console.log(
+        `Compiling ${sourceFile}`
+    );
+
+    bytenode.compileFile({
+        filename: sourceFile,
+        output: targetFile
+    });
+
+}
+
+function compileFolder(sourceFolder, targetFolder) {
+
+    if (!fs.existsSync(sourceFolder)) {
+        return;
+    }
+
+    fs.mkdirSync(
+        targetFolder,
+        {
+            recursive: true
+        }
+    );
+
+    for (const item of fs.readdirSync(sourceFolder)) {
+
+        const source =
+            path.join(
+                sourceFolder,
+                item
+            );
+
+        const stat =
+            fs.statSync(source);
+
+        if (stat.isDirectory()) {
+
+            compileFolder(
+                source,
+                path.join(
+                    targetFolder,
+                    item
+                )
+            );
+
+            continue;
+
+        }
+
+        if (!item.endsWith('.js')) {
+            continue;
+        }
+
+        const target =
+            path.join(
+                targetFolder,
+                item.replace(
+                    '.js',
+                    '.jsc'
+                )
+            );
+
+        compileFile(
+            source,
+            target
+        );
+
+    }
+
+}
+
+console.log(
+    'Building Aifos Core Release...'
+);
+
+cleanRelease();
+
+copyRecursive(
+    path.join(SERVER, 'database'),
+    path.join(RELEASE, 'database')
+);
+
+copyRecursive(
+    path.join(SERVER, 'migrations'),
+    path.join(RELEASE, 'migrations')
+);
+
+copyRecursive(
+    path.join(SERVER, 'scripts'),
+    path.join(RELEASE, 'scripts')
+);
+
+copyRecursive(
+    path.join(SERVER, 'appsettings.json'),
+    path.join(RELEASE, 'appsettings.json')
+);
+
+copyRecursive(
+    path.join(SERVER, 'db.js'),
+    path.join(RELEASE, 'db.js')
+);
+
+copyRecursive(
+    path.join(SERVER, 'src', 'config'),
+    path.join(RELEASE, 'src', 'config')
+);
+
+copyRecursive(
+    path.join(SERVER, 'package.json'),
+    path.join(RELEASE, 'package.json')
+);
+
+copyRecursive(
+    path.join(SERVER, 'package-lock.json'),
+    path.join(RELEASE, 'package-lock.json')
+);
+
+compileFile(
+    path.join(SERVER, 'server.js'),
+    path.join(RELEASE, 'server.jsc')
+);
+
+compileFolder(
+    path.join(SERVER, 'src', 'controllers'),
+    path.join(RELEASE, 'src', 'controllers')
+);
+
+compileFolder(
+    path.join(SERVER, 'src', 'services'),
+    path.join(RELEASE, 'src', 'services')
+);
+
+compileFolder(
+    path.join(SERVER, 'src', 'routes'),
+    path.join(RELEASE, 'src', 'routes')
+);
+
+compileFolder(
+    path.join(SERVER, 'src', 'middleware'),
+    path.join(RELEASE, 'src', 'middleware')
+);
+
+compileFolder(
+    path.join(SERVER, 'src', 'utils'),
+    path.join(RELEASE, 'src', 'utils')
+);
+
+fs.writeFileSync(
+    path.join(
+        RELEASE,
+        'bootstrap.js'
+    ),
+`
+require('bytenode');
+require('./server.jsc');
+`
+);
+
+fs.mkdirSync(
+    path.join(RELEASE, 'logs'),
+    { recursive: true }
+);
+
+fs.mkdirSync(
+    path.join(RELEASE, 'backups'),
+    { recursive: true }
+);
+
+const packageInfo =
+    require(
+        path.join(
+            SERVER,
+            'package.json'
+        )
+    );
+
+const versionInfo = {
+    product: 'Aifos Core',
+    version: packageInfo.version,
+    buildDate: new Date().toISOString()
+};
+
+fs.writeFileSync(
+    path.join(
+        RELEASE,
+        'version.json'
+    ),
+    JSON.stringify(
+        versionInfo,
+        null,
+        4
+    )
+);
+
+fs.writeFileSync(
+    path.join(
+        RELEASE,
+        'RELEASE.txt'
+    ),
+`Aifos Core
+
+Version:
+${packageInfo.version}
+
+Build Date:
+${new Date().toISOString()}
+
+Protected Build:
+YES
+
+Generated By:
+Aifos Build Pipeline
+`
+);
+
+console.log(
+    'Aifos Core Release Complete.'
+);
