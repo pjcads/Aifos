@@ -26,10 +26,13 @@ exports.createSale = async (req, res) => {
                     req.body.terminalId,
 
                 negativeInventoryApprovalId:
-                    req.body.negativeInventoryApprovalId
+                    req.body.negativeInventoryApprovalId,
+
+                amountTendered:
+                    req.body.amountTendered
 
             });
-
+            
         res.json({
             success: true,
             ...result

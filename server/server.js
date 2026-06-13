@@ -12,6 +12,7 @@ const productRoutes = require('./src/routes/productRoutes');
 const customerRoutes = require('./src/routes/customerRoutes');
 const userRoutes = require('./src/routes/userRoutes');
 const inventoryRoutes = require('./src/routes/inventoryRoutes');
+const negativeInventoryApprovalRoutes = require('./src/routes/negativeInventoryApprovalRoutes');
 const payrollRoutes = require('./src/routes/payrollRoutes');
 const checkoutRoutes = require('./src/routes/checkoutRoutes');
 const refundRoutes = require('./src/routes/refundRoutes');
@@ -127,6 +128,13 @@ app.use(
   authMiddleware,
   roleMiddleware('ADMIN', 'MANAGER'),
   inventoryRoutes
+);
+
+app.use(
+    '/api/negative-inventory-approvals',
+    authMiddleware,
+    roleMiddleware('ADMIN', 'MANAGER'),
+    negativeInventoryApprovalRoutes
 );
 
 app.use(

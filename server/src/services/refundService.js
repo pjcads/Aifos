@@ -4,6 +4,7 @@ const creditService = require('./creditService');
 const inventoryService = require('./inventoryService');
 const numberGeneratorService = require('./numberGeneratorService');
 const walletService = require('./walletService');
+const negativeInventoryApprovalService = require('./negativeInventoryApprovalService');
 
 class RefundService {
 
@@ -246,6 +247,12 @@ class RefundService {
                 [original.id]
             );
 
+            await negativeInventoryApprovalService
+                .reverseApprovalConsumption(
+                    connection,
+                    original.id
+                );
+                            
             await connection.commit();
 
             return {

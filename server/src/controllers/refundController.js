@@ -6,6 +6,15 @@ exports.refundTransaction =
 
         try {
 
+            if (!req.params.transactionId) {
+
+                return res.status(400).json({
+                    success: false,
+                    error: 'Transaction ID is required'
+                });
+
+            }            
+
             const result =
                 await refundService
                     .refundTransaction(

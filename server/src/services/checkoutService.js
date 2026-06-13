@@ -374,13 +374,14 @@ class CheckoutService {
                     negativeInventoryApprovalId
                 ) {
 
-                    await negativeInventoryApprovalService
-                        .consumeApproval(
-                            connection,
-                            negativeInventoryApprovalId,
-                            product.quantity
-                        );
-
+                await negativeInventoryApprovalService
+                    .consumeApproval(
+                        connection,
+                        negativeInventoryApprovalId,
+                        transactionId,
+                        product.quantity
+                    );
+                    
                 }
             }
 

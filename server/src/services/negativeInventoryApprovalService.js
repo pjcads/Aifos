@@ -124,6 +124,7 @@ class NegativeInventoryApprovalService {
     async consumeApproval(
         connection,
         approvalId,
+        transactionId,
         quantity
     ) {
 
@@ -149,6 +150,77 @@ class NegativeInventoryApprovalService {
             `,
             [approvalId]
         );
+
+        await connection.query(
+            `
+            INSERT INTO
+            negative_inventory_approval_consumptions
+            (
+                id,
+                approval_id,
+                transaction_id,
+                quantity
+            )
+            VALUES
+            (
+                ?, ?, ?, ?
+            )
+            `,
+            [
+                idGenerator
+                    .negativeInventoryConsumptionId(),
+                approvalId,
+                transactionId,
+                quantity
+            ]
+        );        
+
+    } 
+    
+    async reverseApprovalConsumption(
+        connection,
+        transactionId
+    ) {
+
+        const [rows] =
+            await connection.query(
+                `
+                SELECT *
+                FROM negative_inventory_approval_consumptions
+                WHERE transaction_id = ?
+                `,
+                [transactionId]
+            );
+
+        for (const row of rows) {
+
+            await connection.query(
+                `
+                UPDATE negative_inventory_approvals
+                SET
+                    used_quantity =
+                        used_quantity - ?
+                WHERE id = ?
+                `,
+                [
+                    row.quantity,
+                    row.approval_id
+                ]
+            );
+
+            await connection.query(
+                `
+                UPDATE negative_inventory_approvals
+                SET status = 'APPROVED'
+                WHERE id = ?
+                AND used_quantity < approved_quantity
+                `,
+                [
+                    row.approval_id
+                ]
+            );
+
+        }
 
     }    
 }
