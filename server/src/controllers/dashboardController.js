@@ -152,3 +152,28 @@ exports.getTopWalletUsers =
         }
 
     };    
+
+exports.getTerminalStatus =
+    async (req, res) => {
+
+        try {
+
+            const rows =
+                await dashboardService
+                    .getTerminalStatus();
+
+            res.json({
+                success: true,
+                terminals: rows
+            });
+
+        } catch (err) {
+
+            res.status(400).json({
+                success: false,
+                error: err.message
+            });
+
+        }
+
+    };    

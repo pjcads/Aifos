@@ -34,4 +34,6 @@ module.exports = {
     orderLineId: () => `ODL${ulid()}`,
 
     negativeInventoryConsumptionId: () => `NIC${ulid()}`,
+
+    categoryId: () => `CAT${ulid()}`,
 };

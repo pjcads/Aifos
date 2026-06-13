@@ -35,4 +35,9 @@ router.get(
     controller.getTopWalletUsers
 );
 
+router.get(
+    '/terminal-status',
+    controller.getTerminalStatus
+);
+
 module.exports = router;

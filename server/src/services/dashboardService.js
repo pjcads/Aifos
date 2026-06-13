@@ -88,6 +88,38 @@ class DashboardService {
                 `
             );
 
+        const [[terminals]] =
+            await db.query(
+                `
+                SELECT
+                    COUNT(*) count
+                FROM terminals
+                WHERE terminal_status = 'ONLINE'
+                `
+            );            
+
+        const [[approvals]] =
+            await db.query(
+                `
+                SELECT
+                    COUNT(*) count
+                FROM negative_inventory_approvals
+                WHERE
+                    reconciliation_status <>
+                    'FULLY_RECONCILED'
+                `
+            );
+
+        const [[sessions]] =
+            await db.query(
+                `
+                SELECT
+                    COUNT(*) count
+                FROM cashier_sessions
+                WHERE status = 'OPEN'
+                `
+            );
+                        
         return {
 
             todaySales:
@@ -133,8 +165,21 @@ class DashboardService {
             walletTopupsToday:
                 Number(
                     walletTopups.total_topups
-                )
+                ),
 
+            onlineTerminals:
+                Number(terminals.count),
+
+            openNegativeApprovals:
+                Number(
+                    approvals.count
+                ),
+
+            activeCashierSessions:
+                Number(
+                    sessions.count
+                )                
+                            
         };
 
     }
@@ -332,6 +377,27 @@ class DashboardService {
                     transaction_count DESC
 
                 LIMIT 20
+                `
+            );
+
+        return rows;
+
+    }    
+
+    async getTerminalStatus() {
+
+        const [rows] =
+            await db.query(
+                `
+                SELECT
+                    terminal_code,
+                    terminal_name,
+                    terminal_status,
+                    app_version,
+                    machine_name,
+                    last_seen_at
+                FROM terminals
+                ORDER BY terminal_code
                 `
             );
 

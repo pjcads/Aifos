@@ -27,6 +27,7 @@ const dashboardRoutes = require('./src/routes/dashboardRoutes');
 const reportRoutes = require('./src/routes/reportRoutes');
 const syncRoutes = require('./src/routes/syncRoutes');
 const terminalRoutes = require('./src/routes/terminalRoutes');
+const categoryRoutes = require('./src/routes/categoryRoutes');
 
 const authMiddleware = require('./src/middleware/authMiddleware');
 const roleMiddleware = require('./src/middleware/roleMiddleware');
@@ -84,6 +85,12 @@ app.use(
     '/api/sync',
     authMiddleware,
     syncRoutes
+);
+
+app.use(
+    '/api/categories',
+    authMiddleware,
+    categoryRoutes
 );
 
 /**

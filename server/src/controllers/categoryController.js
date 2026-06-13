@@ -1,18 +1,18 @@
-const productService =
-    require('../services/productService');
+const categoryService =
+    require('../services/categoryService');
 
-exports.getProducts =
+exports.getCategories =
     async (req, res) => {
 
         try {
 
             const rows =
-                await productService
-                    .getProducts();
+                await categoryService
+                    .getCategories();
 
             res.json({
                 success: true,
-                products: rows
+                categories: rows
             });
 
         } catch (err) {
@@ -26,20 +26,20 @@ exports.getProducts =
 
     };
 
-exports.getProduct =
+exports.getCategory =
     async (req, res) => {
 
         try {
 
-            const product =
-                await productService
-                    .getProduct(
+            const category =
+                await categoryService
+                    .getCategory(
                         req.params.id
                     );
 
             res.json({
                 success: true,
-                product
+                category
             });
 
         } catch (err) {
@@ -53,16 +53,22 @@ exports.getProduct =
 
     };
 
-exports.createProduct =
+exports.createCategory =
     async (req, res) => {
 
         try {
 
             const result =
-                await productService
-                    .createProduct(
-                        req.body
-                    );
+                await categoryService
+                    .createCategory({
+
+                        categoryCode:
+                            req.body.categoryCode,
+
+                        categoryName:
+                            req.body.categoryName
+
+                    });
 
             res.json({
                 success: true,
@@ -80,14 +86,14 @@ exports.createProduct =
 
     };
 
-exports.updateProduct =
+exports.updateCategory =
     async (req, res) => {
 
         try {
 
             const result =
-                await productService
-                    .updateProduct(
+                await categoryService
+                    .updateCategory(
                         req.params.id,
                         req.body
                     );
