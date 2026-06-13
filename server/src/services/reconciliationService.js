@@ -49,6 +49,14 @@ class ReconciliationService {
             // Validate remaining quantity
             //
 
+            if (Number(quantity) <= 0) {
+
+                throw new Error(
+                    'Reconciliation quantity must be greater than zero'
+                );
+
+            }
+
             const remainingQuantity =
                 Number(
                     approval.used_quantity
@@ -58,11 +66,15 @@ class ReconciliationService {
                     approval.reconciled_quantity
                 );
 
-            if (
-                Number(quantity)
-                >
-                remainingQuantity
-            ) {
+            if (remainingQuantity <= 0 ) {
+
+                throw new Error(
+                    `Negative inventory approval already fully reconciled`
+                );
+
+            }
+
+            if (Number(quantity) > remainingQuantity ) {
 
                 throw new Error(
                     `Remaining unreconciled quantity is only ${remainingQuantity}`
@@ -145,35 +157,6 @@ class ReconciliationService {
                 ]
             );
 
-            //
-            // Restore inventory
-            //
-
-            const [result] =
-                await connection.query(
-                    `
-                    UPDATE inventory_balances
-                    SET
-                        quantity_on_hand =
-                            quantity_on_hand + ?,
-                        last_updated = NOW()
-                    WHERE product_id = ?
-                    `,
-                    [
-                        quantity,
-                        approval.product_id
-                    ]
-                );
-
-            if (
-                result.affectedRows === 0
-            ) {
-
-                throw new Error(
-                    `Inventory balance record not found for product ${approval.product_id}`
-                );
-
-            }
             //
             // Update approval
             //
