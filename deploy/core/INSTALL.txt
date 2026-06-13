@@ -1,0 +1,41 @@
+AIFOS CORE REQUIREMENTS
+
+Node.js:
+26.x
+
+MySQL:
+8.x
+
+Operating System:
+Windows 10
+Windows 11
+Windows Server 2019+
+Windows Server 2022+
+
+INSTALLATION
+
+1. Install Node.js 26.x
+
+2. Install MySQL 8.x
+
+3. Create database
+
+4. Update appsettings.json
+
+5. Run:
+
+   npm install
+
+6. Run:
+
+   node scripts/setupCore.js
+
+7. Install Service:
+
+   node scripts/installService.js
+
+8. Verify:
+
+   http://localhost:5000/health
+
+9. Reboot server and verify service starts automatically.

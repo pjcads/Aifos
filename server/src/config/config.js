@@ -3,7 +3,9 @@ const path = require('path');
 
 const configPath =
     path.join(
-        process.cwd(),
+        __dirname,
+        '..',
+        '..',
         'appsettings.json'
     );
 

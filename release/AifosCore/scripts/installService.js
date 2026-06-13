@@ -12,34 +12,27 @@ const service = new Service({
 
     script:
         path.join(
-            process.cwd(),
-            'server.js'
+            __dirname,
+            '..',
+            'bootstrap.js'
         )
 
 });
 
-service.on(
-    'install',
-    () => {
+service.on('install', () => {
 
-        console.log(
-            'Service installed.'
-        );
+    console.log('Service installed.');
 
+    setTimeout(() => {
         service.start();
+    }, 5000);
 
-    }
-);
+});
 
-service.on(
-    'start',
-    () => {
+service.on('start', () => {
 
-        console.log(
-            'Service started.'
-        );
+    console.log('Service started.');
 
-    }
-);
+});
 
 service.install();
