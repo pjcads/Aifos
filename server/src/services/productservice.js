@@ -1,5 +1,6 @@
 const db = require('../../db');
 const idGenerator = require('../utils/idGenerator');
+const priceService = require('./priceService');
 
 class ProductService {
 
@@ -15,13 +16,32 @@ class ProductService {
                 FROM products p
                 LEFT JOIN product_categories pc
                     ON pc.id = p.category_id
+                WHERE p.is_active = 1
                 ORDER BY p.name
                 `
             );
 
+        const productIds =
+            rows.map(
+                x => x.id
+            );
+
+        const priceMap =
+            await priceService
+                .getCurrentPrices(
+                    productIds
+                );            
+
         return rows.map(product => ({
 
             ...product,
+
+            current_price:
+                Number(
+                    priceMap[
+                        product.id
+                    ] || 0
+                ),
 
             is_active:
                 product.is_active === 1,
@@ -62,9 +82,22 @@ class ProductService {
 
         }
 
+        const priceMap =
+            await priceService
+                .getCurrentPrices([
+                    productId
+                ]);
+
         return {
 
             ...rows[0],
+
+            current_price:
+                Number(
+                    priceMap[
+                        productId
+                    ] || 0
+                ),
 
             is_active:
                 rows[0].is_active === 1,
@@ -72,7 +105,8 @@ class ProductService {
             allow_negative_inventory:
                 rows[0].allow_negative_inventory === 1
 
-        };
+        };                
+
     }
 
     async createProduct({
