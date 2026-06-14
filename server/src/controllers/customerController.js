@@ -1,124 +1,193 @@
-const db = require('../../db');
-const idGenerator = require('../utils/idGenerator');
-const customerUtils = require('../utils/customerUtils');
+const customerService = require('../services/customerService');
 const creditService = require('../services/creditService');
 
-exports.getAllCustomers = async (req, res) => {
-    try {
-        const [rows] = await db.query(
-            'SELECT * FROM customers ORDER BY id DESC'
-        );
-        res.json(rows);
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-};
+exports.getAllCustomers =
+    async (req, res) => {
 
-exports.getCustomerById = async (req, res) => {
-    try {
-        const [rows] = await db.query(
-            'SELECT * FROM customers WHERE id = ?',
-            [req.params.id]
-        );
+        try {
 
-        if (rows.length === 0) {
-            return res.status(404).json({ error: 'Customer not found' });
-        }
+            const rows =
+                await customerService
+                    .getCustomers();
 
-        const customer = customerUtils.calculateAvailableCredit(rows[0]);
-
-        res.json(customer);        
-
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-};
-
-exports.createCustomer = async (req, res) => {
-    try {
-        const { name, phone, email, address } = req.body;
-
-        const id = idGenerator.customerId();
-
-        await db.query(
-            `INSERT INTO customers (id, name, phone, email, address)
-             VALUES (?, ?, ?, ?, ?)`,
-            [id, name, phone, email, address]
-        );
-
-        res.json({
-            message: 'Customer created successfully',
-            id
-        });
-
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-};
-
-exports.updateCustomer = async (req, res) => {
-    try {
-        const { name, phone, email, address, loyalty_points } = req.body;
-
-        await db.query(
-            `UPDATE customers 
-             SET name=?, phone=?, email=?, address=?, loyalty_points=?
-             WHERE id=?`,
-            [name, phone, email, address, loyalty_points, req.params.id]
-        );
-
-        res.json({ message: 'Customer updated successfully' });
-
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-};
-
-exports.deleteCustomer = async (req, res) => {
-    try {
-        await db.query(
-            'DELETE FROM customers WHERE id=?',
-            [req.params.id]
-        );
-
-        res.json({ message: 'Customer deleted successfully' });
-
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-};
-
-exports.getCustomerByBarcode = async (req, res) => {
-
-    try {
-
-        const [rows] = await db.query(
-            `
-            SELECT *
-            FROM customers
-            WHERE barcode = ?
-            `,
-            [req.params.barcode]
-        );
-
-        if (rows.length === 0) {
-            return res.status(404).json({
-                error: 'Customer not found'
+            res.json({
+                success: true,
+                customers: rows
             });
+
+        } catch (err) {
+
+            res.status(400).json({
+                success: false,
+                error: err.message
+            });
+
         }
 
-        const customer = customerUtils.calculateAvailableCredit(rows[0]);
+    };
 
-        res.json(customer);
+exports.getCustomerById =
+    async (req, res) => {
 
-    } catch (err) {
+        try {
 
-        res.status(500).json({
-            error: err.message
-        });
+            const customer =
+                await customerService
+                    .getCustomer(
+                        req.params.id
+                    );
 
-    }
-};
+            res.json({
+                success: true,
+                customer
+            });
+
+        } catch (err) {
+
+            res.status(400).json({
+                success: false,
+                error: err.message
+            });
+
+        }
+
+    };
+
+exports.createCustomer =
+    async (req, res) => {
+
+        try {
+
+            const result =
+                await customerService
+                    .createCustomer(
+                        req.body
+                    );
+
+            res.json({
+                success: true,
+                ...result
+            });
+
+        } catch (err) {
+
+            res.status(400).json({
+                success: false,
+                error: err.message
+            });
+
+        }
+
+    };
+
+exports.updateCustomer =
+    async (req, res) => {
+
+        try {
+
+            const result =
+                await customerService
+                    .updateCustomer(
+                        req.params.id,
+                        req.body
+                    );
+
+            res.json({
+                success: true,
+                ...result
+            });
+
+        } catch (err) {
+
+            res.status(400).json({
+                success: false,
+                error: err.message
+            });
+
+        }
+
+    };
+
+exports.getCustomerByBarcode =
+    async (req, res) => {
+
+        try {
+
+            const customer =
+                await customerService
+                    .getCustomerByBarcode(
+                        req.params.barcode
+                    );
+
+            res.json({
+                success: true,
+                customer
+            });
+
+        } catch (err) {
+
+            res.status(400).json({
+                success: false,
+                error: err.message
+            });
+
+        }
+
+    };
+
+exports.deactivateCustomer =
+    async (req, res) => {
+
+        try {
+
+            const result =
+                await customerService
+                    .deactivateCustomer(
+                        req.params.id
+                    );
+
+            res.json({
+                success: true,
+                ...result
+            });
+
+        } catch (err) {
+
+            res.status(400).json({
+                success: false,
+                error: err.message
+            });
+
+        }
+
+    };
+
+exports.activateCustomer =
+    async (req, res) => {
+
+        try {
+
+            const result =
+                await customerService
+                    .activateCustomer(
+                        req.params.id
+                    );
+
+            res.json({
+                success: true,
+                ...result
+            });
+
+        } catch (err) {
+
+            res.status(400).json({
+                success: false,
+                error: err.message
+            });
+
+        }
+
+    };    
 
 exports.consumeCredit = async (req, res) => {
 

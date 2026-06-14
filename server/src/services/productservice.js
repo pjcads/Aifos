@@ -19,7 +19,17 @@ class ProductService {
                 `
             );
 
-        return rows;
+        return rows.map(product => ({
+
+            ...product,
+
+            is_active:
+                product.is_active === 1,
+
+            allow_negative_inventory:
+                product.allow_negative_inventory === 1
+
+        }));
 
     }
 
@@ -52,8 +62,17 @@ class ProductService {
 
         }
 
-        return rows[0];
+        return {
 
+            ...rows[0],
+
+            is_active:
+                rows[0].is_active === 1,
+
+            allow_negative_inventory:
+                rows[0].allow_negative_inventory === 1
+
+        };
     }
 
     async createProduct({
