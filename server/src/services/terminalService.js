@@ -241,6 +241,57 @@ class TerminalService {
 
     }
 
+    async registerTerminal(
+        terminalCode
+    ) {
+
+        const [rows] =
+            await db.query(
+                `
+                SELECT *
+                FROM terminals
+                WHERE terminal_code = ?
+                `,
+                [terminalCode]
+            );
+
+        if (
+            rows.length === 0
+        ) {
+
+            throw new Error(
+                'Terminal not found'
+            );
+
+        }
+
+        const terminal =
+            rows[0];
+
+        if (
+            !terminal.is_active
+        ) {
+
+            throw new Error(
+                'Terminal is disabled'
+            );
+
+        }
+
+        await db.query(
+            `
+            UPDATE terminals
+            SET
+                registered_at = NOW()
+            WHERE id = ?
+            `,
+            [terminal.id]
+        );
+
+        return terminal;
+
+    }    
+
 }
 
 module.exports = new TerminalService();

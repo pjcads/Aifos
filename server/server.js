@@ -52,6 +52,13 @@ app.get('/health', (req, res) => {
 });
 
 app.use(
+    '/api/terminals',
+    terminalRoutes
+);
+
+
+
+app.use(
     '/api/sessions',
     authMiddleware,
     cashierSessionRoutes
@@ -170,13 +177,6 @@ app.use(
     authMiddleware,
     roleMiddleware('ADMIN','MANAGER'),
     reportRoutes
-);
-
-app.use(
-    '/api/terminals',
-    authMiddleware,
-    roleMiddleware('ADMIN','MANAGER'),
-    terminalRoutes
 );
 
 // Users: ONLY super admin

@@ -149,3 +149,30 @@ exports.heartbeat =
         }
 
     };    
+
+exports.registerTerminal =
+    async (req, res) => {
+
+        try {
+
+            const terminal =
+                await terminalService
+                    .registerTerminal(
+                        req.body.terminalCode
+                    );
+
+            res.json({
+                success: true,
+                terminal
+            });
+
+        } catch (err) {
+
+            res.status(400).json({
+                success: false,
+                error: err.message
+            });
+
+        }
+
+    };    

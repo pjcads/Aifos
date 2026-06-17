@@ -35,4 +35,9 @@ router.put(
     controller.updateTerminal
 );
 
+router.post(
+    '/register',
+    controller.registerTerminal
+);
+
 module.exports = router;
