@@ -8,6 +8,9 @@ const pool = mysql.createPool({
     database: config.Database.Name,
     port: config.Database.Port,
 
+    timezone: '+08:00',
+    dateStrings: true,
+
     waitForConnections: true,
     connectionLimit: 10,
     queueLimit: 0
