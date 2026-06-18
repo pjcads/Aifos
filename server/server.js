@@ -56,8 +56,11 @@ app.use(
     terminalRoutes
 );
 
-
-
+/**
+ * =========================
+ * AUTHENTICATED ROUTES
+ * =========================
+ */
 app.use(
     '/api/sessions',
     authMiddleware,
@@ -100,29 +103,27 @@ app.use(
     categoryRoutes
 );
 
+app.use('/api/customers',
+    authMiddleware,
+    customerRoutes);
+
+app.use(
+   '/api/products',
+   authMiddleware,
+   productRoutes
+);
+
+app.use(
+    '/api/checkout',
+    authMiddleware,
+    checkoutRoutes
+);
 /**
  * =========================
  * PROTECTED ROUTES
  * =========================
  */
-
-// Customers: any logged-in user
-app.use('/api/customers', authMiddleware, customerRoutes);
-
-app.use(
-    '/api/checkout',
-    authMiddleware,
-    roleMiddleware('ADMIN','MANAGER'),
-    checkoutRoutes
-);
-
 // Products: manager + super admin
-app.use(
-  '/api/products',
-  authMiddleware,
-  roleMiddleware('MANAGER', 'ADMIN'),
-  productRoutes
-);
 
 app.use(
     '/api/payroll',
