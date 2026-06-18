@@ -288,7 +288,13 @@ class TerminalService {
             [terminal.id]
         );
 
-        return terminal;
+        return {
+            id: terminal.id,
+            terminal_code:
+                terminal.terminal_code,
+            api_key:
+                terminal.api_key
+        };
 
     }    
 
