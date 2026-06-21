@@ -2,16 +2,19 @@ INSERT INTO users
 (
     id,
     username,
+    full_name,
     password,
     role,
-    is_active
+    is_active,
+    is_system_account
 )
 SELECT
     'USR000000000000000000000000001',
     'admin',
+    'SystemAdministrator',
     '$2b$10$Ol4KR3Oa1t1fOE.GQWHIlefGuqae7ebEy2DhIoid2p8ki2t6LbWT6',
     'ADMIN',
-    1
+    1, 1
 WHERE NOT EXISTS
 (
     SELECT 1
