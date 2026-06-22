@@ -35,5 +35,7 @@ module.exports = {
 
     negativeInventoryConsumptionId: () => `NIC${ulid()}`,
 
+    priceId: () => `PRI${ulid()}`,
+
     categoryId: () => `CAT${ulid()}`,
 };

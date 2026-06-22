@@ -28,6 +28,7 @@ const reportRoutes = require('./src/routes/reportRoutes');
 const syncRoutes = require('./src/routes/syncRoutes');
 const terminalRoutes = require('./src/routes/terminalRoutes');
 const categoryRoutes = require('./src/routes/categoryRoutes');
+const priceRoutes = require('./src/routes/priceRoutes');
 
 const authMiddleware = require('./src/middleware/authMiddleware');
 const roleMiddleware = require('./src/middleware/roleMiddleware');
@@ -178,6 +179,16 @@ app.use(
     authMiddleware,
     roleMiddleware('ADMIN','MANAGER'),
     reportRoutes
+);
+
+app.use(
+    '/api/prices',
+    authMiddleware,
+    roleMiddleware(
+        'ADMIN',
+        'MANAGER'
+    ),
+    priceRoutes
 );
 
 // Users: ONLY super admin
