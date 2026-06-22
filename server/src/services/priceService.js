@@ -95,6 +95,43 @@ class PriceService {
         createdBy
     })
     {
+        const [productRows] =
+            await db.query(
+                `
+                SELECT id
+                FROM products
+                WHERE id = ?
+                `,
+                [productId]
+            );
+
+        if (
+            productRows.length === 0
+        )
+        {
+            throw new Error(
+                'Product not found'
+            );
+        }         
+        
+        if (
+            price <= 0
+        )
+        {
+            throw new Error(
+                'Price must be greater than zero'
+            );
+        }
+            
+        if (
+            !priceType
+        )
+        {
+            throw new Error(
+                'Price type is required'
+            );
+        }
+
         const priceId =
             idGenerator.priceId();
 
