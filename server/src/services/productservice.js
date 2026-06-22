@@ -16,7 +16,6 @@ class ProductService {
                 FROM products p
                 LEFT JOIN product_categories pc
                     ON pc.id = p.category_id
-                WHERE p.is_active = 1
                 ORDER BY p.name
                 `
             );
@@ -237,6 +236,9 @@ class ProductService {
             );
 
         }
+
+        categoryId =
+            categoryId || null;        
 
         if (categoryId) {
 
