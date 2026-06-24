@@ -220,7 +220,7 @@ class InventoryService {
                     movement_type,
                     quantity_change,
                     reference_id,
-                    approval_id
+                    approval_id,
                     remarks,
                     created_by,
                     movement_datetime

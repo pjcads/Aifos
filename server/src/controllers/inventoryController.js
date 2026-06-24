@@ -9,10 +9,19 @@ exports.getBalances = async (req, res) => {
             `
             SELECT
                 p.id,
+                p.barcode,
                 p.sku,
+                p.barcode,
                 p.name,
-                IFNULL(b.quantity_on_hand,0) quantity_on_hand
+                c.category_name,
+                p.unit_of_measure,
+                IFNULL(
+                    b.quantity_on_hand,
+                    0
+                ) quantity_on_hand
             FROM products p
+            LEFT JOIN product_categories c
+                ON c.id = p.category_id
             LEFT JOIN inventory_balances b
                 ON p.id = b.product_id
             ORDER BY p.name
