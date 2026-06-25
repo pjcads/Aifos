@@ -1,5 +1,8 @@
 const db = require('../../db');
-const idGenerator = require('../utils/idGenerator');
+const searchHelper =
+    require('../utils/searchHelper');
+const idGenerator = 
+    require('../utils/idGenerator');
 
 class InventoryService {
 
@@ -291,7 +294,90 @@ class InventoryService {
             connection.release();
 
         }
-    }    
+    } 
+     
+    async getBalances(
+        query,
+        searchableColumns
+    )
+    {
+        const searchFilter =
+            searchHelper.build(
+                query.search,
+                searchableColumns
+            );
+
+        const [countRows] =
+            await db.query(
+                `
+                SELECT
+                    COUNT(*) total
+                FROM products p
+
+                LEFT JOIN product_categories c
+                    ON c.id = p.category_id
+
+                LEFT JOIN inventory_balances b
+                    ON p.id = b.product_id
+
+                ${searchFilter.where}
+                `,
+                [
+                    ...searchFilter.params
+                ]
+            );
+
+        const total =
+            countRows[0].total;
+
+        const [rows] =
+            await db.query(
+                `
+                SELECT
+                    p.id,
+                    p.barcode,
+                    p.sku,
+                    p.name,
+                    c.category_name,
+                    p.unit_of_measure,
+                    IFNULL(
+                        b.quantity_on_hand,
+                        0
+                    ) quantity_on_hand
+
+                FROM products p
+
+                LEFT JOIN product_categories c
+                    ON c.id = p.category_id
+
+                LEFT JOIN inventory_balances b
+                    ON p.id = b.product_id
+
+                ${searchFilter.where}
+
+                ORDER BY
+                    ${query.orderBy}
+                    ${query.direction}
+
+                LIMIT ?
+
+                OFFSET ?
+                `,
+                [
+                    ...searchFilter.params,
+                    query.pageSize,
+                    query.offset
+                ]
+            );
+
+        return {
+            total,
+            page: query.page,
+            pageSize: query.pageSize,
+            rows
+        };
+    }
+
 }
 
 module.exports = new InventoryService();
