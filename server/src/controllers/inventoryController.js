@@ -38,6 +38,48 @@ const searchableColumns =
     'c.category_name'
 ];
 
+const movementSortableColumns =
+{
+    movement_datetime:
+        'm.movement_datetime',
+
+    barcode:
+        'p.barcode',
+
+    sku:
+        'p.sku',
+
+    name:
+        'p.name',
+
+    category_name:
+        'c.category_name',
+
+    movement_type:
+        'm.movement_type',
+
+    quantity_change:
+        'm.quantity_change',
+
+    reference_id:
+        'm.reference_id',
+
+    username:
+        'u.username'
+};
+
+const movementSearchableColumns =
+[
+    'p.barcode',
+    'p.sku',
+    'p.name',
+    'c.category_name',
+    'm.reference_id',
+    'u.username',
+    'm.remarks',
+    'm.movement_type'
+];
+
 exports.getBalances = async (req, res) => {
 
     const query =
@@ -71,48 +113,31 @@ exports.getBalances = async (req, res) => {
 
 exports.getMovements = async (req, res) => {
 
-    try {
-
-        const [rows] = await db.query(
-            `
-            SELECT
-                m.id,
-                m.movement_datetime,
-                p.barcode,
-                p.sku,
-                p.name,
-                c.category_name,
-                p.unit_of_measure,
-                m.movement_type,
-                m.quantity_change,
-                m.reference_id,
-                u.username,
-                m.remarks
-            FROM inventory_movements m
-
-            INNER JOIN products p
-                ON p.id = m.product_id
-
-            LEFT JOIN product_categories c
-                ON c.id = p.category_id
-
-            LEFT JOIN users u
-                ON u.id = m.created_by
-
-            ORDER BY
-                m.movement_datetime DESC
-
-            LIMIT 500
-            `
+    const query =
+        queryHelper.build(
+            req,
+            movementSortableColumns
         );
 
-        res.json(rows);
+    try {
+
+        const result =
+            await inventoryService.getMovements(
+                query,
+                movementSearchableColumns
+            );
+
+        return responseHelper.successPaged(
+            res,
+            result
+        );
 
     } catch (err) {
 
-        res.status(500).json({
-            error: err.message
-        });
+        return responseHelper.error(
+            res,
+            err
+        );
 
     }
 };

@@ -378,6 +378,99 @@ class InventoryService {
         };
     }
 
+    async getMovements(
+        query,
+        searchableColumns
+    )
+    {
+        const searchFilter =
+            searchHelper.build(
+                query.search,
+                searchableColumns
+            );
+
+        const [countRows] =
+            await db.query(
+                `
+                SELECT
+                    COUNT(*) total
+
+                FROM inventory_movements m
+
+                INNER JOIN products p
+                    ON p.id = m.product_id
+
+                LEFT JOIN product_categories c
+                    ON c.id = p.category_id
+
+                LEFT JOIN users u
+                    ON u.id = m.created_by
+
+                ${searchFilter.where}
+                `,
+                [
+                    ...searchFilter.params
+                ]
+            );
+
+        const total =
+            countRows[0].total;
+
+        const [rows] =
+            await db.query(
+                `
+                SELECT
+                    m.id,
+                    m.movement_datetime,
+                    p.barcode,
+                    p.sku,
+                    p.name,
+                    c.category_name,
+                    p.unit_of_measure,
+                    m.movement_type,
+                    m.quantity_change,
+                    m.reference_id,
+                    u.username,
+                    m.remarks
+
+                FROM inventory_movements m
+
+                INNER JOIN products p
+                    ON p.id = m.product_id
+
+                LEFT JOIN product_categories c
+                    ON c.id = p.category_id
+
+                LEFT JOIN users u
+                    ON u.id = m.created_by
+
+                ${searchFilter.where}
+
+                ORDER BY
+                    ${query.orderBy}
+                    ${query.direction}
+
+                LIMIT ?
+
+                OFFSET ?
+                `,
+                [
+                    ...searchFilter.params,
+                    query.pageSize,
+                    query.offset
+                ]
+            );
+
+        return {
+            total,
+            page:
+                query.page,
+            pageSize:
+                query.pageSize,
+            rows
+        };
+    }    
+
 }
 
 module.exports = new InventoryService();
