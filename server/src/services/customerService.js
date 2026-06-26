@@ -4,7 +4,42 @@ const customerUtils = require('../utils/customerUtils');
 
 class CustomerService {
 
-    async getCustomers() {
+    async getCustomers(
+        query,
+        searchableColumns
+    ) {
+
+        const searchHelper =
+            require('../utils/searchHelper');
+
+        const searchFilter =
+            searchHelper.build(
+                query.search,
+                searchableColumns
+            );
+
+        const whereClause =
+            searchFilter.where.replace(
+                'WHERE',
+                'AND'
+            );            
+
+        const [countRows] =
+            await db.query(
+                `
+                SELECT
+                    COUNT(*) total
+                FROM customers
+                WHERE is_active = 1
+                ${whereClause}
+                `,
+                [
+                    ...searchFilter.params
+                ]
+            );
+
+        const total =
+            countRows[0].total;
 
         const [rows] =
             await db.query(
@@ -12,17 +47,36 @@ class CustomerService {
                 SELECT *
                 FROM customers
                 WHERE is_active = 1
-                ORDER BY name
-                `
+                ${whereClause}
+
+                ORDER BY
+                    ${query.orderBy}
+                    ${query.direction}
+
+                LIMIT ?
+
+                OFFSET ?
+                `,
+                [
+                    ...searchFilter.params,
+                    query.pageSize,
+                    query.offset
+                ]
             );
 
-        return rows.map(
-            customer =>
-                customerUtils
-                    .calculateAvailableCredit(
-                        customer
-                    )
-        );
+        return {
+            total,
+            page: query.page,
+            pageSize: query.pageSize,
+            rows:
+                rows.map(
+                    customer =>
+                        customerUtils
+                            .calculateAvailableCredit(
+                                customer
+                            )
+                )
+        };
 
     }
 

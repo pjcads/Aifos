@@ -1,26 +1,76 @@
 const customerService = require('../services/customerService');
 const creditService = require('../services/creditService');
 
+const queryHelper =
+    require('../utils/queryHelper');
+
+const responseHelper =
+    require('../utils/responseHelper');
+
+const sortableColumns =
+{
+    customer_code:
+        'customer_code',
+
+    barcode:
+        'barcode',
+
+    name:
+        'name',
+
+    userid:
+        'userid',
+
+    department:
+        'department',
+
+    available_credit:
+        'available_credit',
+
+    status:
+        'status'
+};
+
+const searchableColumns =
+[
+    'customer_code',
+    'barcode',
+    'name',
+    'userid',
+    'department'
+];
+
 exports.getAllCustomers =
     async (req, res) => {
 
+        const query =
+            queryHelper.build(
+                req,
+                sortableColumns
+            );
+
         try {
 
-            const rows =
+            const result =
                 await customerService
-                    .getCustomers();
+                    .getCustomers(
+                        query,
+                        searchableColumns
+                    );
 
-            res.json({
-                success: true,
-                customers: rows
-            });
+            return responseHelper
+                .successPaged(
+                    res,
+                    result
+                );
 
         } catch (err) {
 
-            res.status(400).json({
-                success: false,
-                error: err.message
-            });
+            return responseHelper
+                .error(
+                    res,
+                    err
+                );
 
         }
 
