@@ -143,10 +143,12 @@ class CustomerService {
     }
 
     async createCustomer({
+        userId,
         name,
-        phone,
-        email,
-        address
+        barcode,
+        department,
+        creditLimit,
+        status
     }) {
 
         const customerId =
@@ -157,22 +159,27 @@ class CustomerService {
             INSERT INTO customers
             (
                 id,
+                userid,
                 name,
-                phone,
-                email,
-                address
+                barcode,
+                department,
+                credit_limit,
+                status,
+                is_active
             )
             VALUES
             (
-                ?, ?, ?, ?, ?
+                ?, ?, ?, ?, ?, ?, ?, 1
             )
             `,
             [
                 customerId,
+                userId,
                 name,
-                phone,
-                email,
-                address
+                barcode,
+                department,
+                creditLimit,
+                status
             ]
         );
 
@@ -185,11 +192,12 @@ class CustomerService {
     async updateCustomer(
         customerId,
         {
+            userId,
             name,
-            phone,
-            email,
-            address,
-            loyalty_points
+            barcode,
+            department,
+            creditLimit,
+            status
         }
     ) {
 
@@ -217,19 +225,21 @@ class CustomerService {
             `
             UPDATE customers
             SET
+                userid = ?,
                 name = ?,
-                phone = ?,
-                email = ?,
-                address = ?,
-                loyalty_points = ?
+                barcode = ?,
+                department = ?,
+                credit_limit = ?,
+                status = ?
             WHERE id = ?
             `,
             [
+                userId,
                 name,
-                phone,
-                email,
-                address,
-                loyalty_points,
+                barcode,
+                department,
+                creditLimit,
+                status,
                 customerId
             ]
         );

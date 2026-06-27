@@ -1,3 +1,6 @@
+const databaseErrorHelper =
+    require('./databaseErrorHelper');
+
 class ResponseHelper
 {
     success(
@@ -38,6 +41,34 @@ class ResponseHelper
         status = 500
     )
     {
+        let message;
+
+        if (
+            error instanceof Error
+        )
+        {
+            message =
+                databaseErrorHelper
+                    .getMessage(error);
+
+            if (
+                message
+            )
+            {
+                status = 400;
+            }
+            else
+            {
+                message =
+                    error.message;
+            }
+        }
+        else
+        {
+            message =
+                error;
+        }
+
         return res
             .status(
                 status
@@ -45,10 +76,7 @@ class ResponseHelper
             .json(
             {
                 success: false,
-                error:
-                    error instanceof Error
-                        ? error.message
-                        : error
+                error: message
             });
     }
 }

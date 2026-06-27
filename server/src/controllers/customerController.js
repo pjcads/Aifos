@@ -87,17 +87,22 @@ exports.getCustomerById =
                         req.params.id
                     );
 
-            res.json({
-                success: true,
-                customer
-            });
+            return responseHelper
+                .success(
+                    res,
+                    {
+                        customer
+                    }
+                );
 
         } catch (err) {
 
-            res.status(400).json({
-                success: false,
-                error: err.message
-            });
+            return responseHelper
+                .error(
+                    res,
+                    err,
+                    400
+                );
 
         }
 
@@ -114,17 +119,20 @@ exports.createCustomer =
                         req.body
                     );
 
-            res.json({
-                success: true,
-                ...result
-            });
+            return responseHelper
+                .success(
+                    res,
+                    result
+                );
 
         } catch (err) {
 
-            res.status(400).json({
-                success: false,
-                error: err.message
-            });
+            return responseHelper
+                .error(
+                    res,
+                    err,
+                    400
+                );
 
         }
 
@@ -142,17 +150,20 @@ exports.updateCustomer =
                         req.body
                     );
 
-            res.json({
-                success: true,
-                ...result
-            });
+            return responseHelper
+                .success(
+                    res,
+                    result
+                );
 
         } catch (err) {
 
-            res.status(400).json({
-                success: false,
-                error: err.message
-            });
+            return responseHelper
+                .error(
+                    res,
+                    err,
+                    400
+                );
 
         }
 
@@ -169,17 +180,22 @@ exports.getCustomerByBarcode =
                         req.params.barcode
                     );
 
-            res.json({
-                success: true,
-                customer
-            });
+            return responseHelper
+                .success(
+                    res,
+                    {
+                        customer
+                    }
+                );
 
         } catch (err) {
 
-            res.status(400).json({
-                success: false,
-                error: err.message
-            });
+            return responseHelper
+                .error(
+                    res,
+                    err,
+                    400
+                );
 
         }
 
@@ -196,17 +212,20 @@ exports.deactivateCustomer =
                         req.params.id
                     );
 
-            res.json({
-                success: true,
-                ...result
-            });
+            return responseHelper
+                .success(
+                    res,
+                    result
+                );
 
         } catch (err) {
 
-            res.status(400).json({
-                success: false,
-                error: err.message
-            });
+            return responseHelper
+                .error(
+                    res,
+                    err,
+                    400
+                );
 
         }
 
@@ -223,47 +242,62 @@ exports.activateCustomer =
                         req.params.id
                     );
 
-            res.json({
-                success: true,
-                ...result
-            });
+            return responseHelper
+                .success(
+                    res,
+                    result
+                );
 
         } catch (err) {
 
-            res.status(400).json({
-                success: false,
-                error: err.message
-            });
+            return responseHelper
+                .error(
+                    res,
+                    err,
+                    400
+                );
 
         }
 
-    };    
+    };
 
-exports.consumeCredit = async (req, res) => {
+exports.consumeCredit =
+    async (req, res) => {
 
-    try {
+        try {
 
-        const { amount, remarks } = req.body;
-
-        const transactionId =
-            await creditService.consumeCredit(
-                req.params.id,
+            const {
                 amount,
-                null,
-                remarks,
-                req.user.id
-            );
+                remarks
+            } = req.body;
 
-        res.json({
-            success: true,
-            transactionId
-        });
+            const transactionId =
+                await creditService
+                    .consumeCredit(
+                        req.params.id,
+                        amount,
+                        null,
+                        remarks,
+                        req.user.id
+                    );
 
-    } catch (err) {
+            return responseHelper
+                .success(
+                    res,
+                    {
+                        transactionId
+                    }
+                );
 
-        res.status(400).json({
-            error: err.message
-        });
+        } catch (err) {
 
-    }
-};
+            return responseHelper
+                .error(
+                    res,
+                    err,
+                    400
+                );
+
+        }
+
+    };
