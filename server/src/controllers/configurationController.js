@@ -22,7 +22,25 @@ const searchableColumns =
     'name',
     'description',
     'domain'
-];   
+];  
+
+const dropdownValueSortableColumns =
+{
+    code: 'code',
+    name: 'name',
+    description: 'description',
+    sort_order: 'sort_order',
+    is_default: 'is_default',
+    is_system: 'is_system',
+    is_active: 'is_active'
+};
+
+const dropdownValueSearchableColumns =
+[
+    'code',
+    'name',
+    'description'
+];
 
 exports.getDropdownTypes =
     async (req, res) => {
@@ -205,20 +223,26 @@ exports.deactivateDropdownType =
 exports.getDropdownValues =
     async (req, res) => {
 
+        const query =
+            queryHelper.build(
+                req,
+                dropdownValueSortableColumns
+            );
+
         try {
 
-            const rows =
+            const result =
                 await configurationService
                     .getDropdownValues(
-                        req.params.dropdownTypeId
+                        req.params.dropdownTypeId,
+                        query,
+                        dropdownValueSearchableColumns
                     );
 
             return responseHelper
-                .success(
+                .successPaged(
                     res,
-                    {
-                        rows
-                    }
+                    result
                 );
 
         } catch (err) {
@@ -374,6 +398,33 @@ exports.deactivateDropdownValue =
         }
 
     };
+
+exports.setDefaultDropdownValue =
+    async (req, res) => {
+
+        try {
+
+            await configurationService
+                .setDefaultDropdownValue(
+                    req.params.id
+                );
+
+            return responseHelper
+                .success(
+                    res
+                );
+
+        } catch (err) {
+
+            return responseHelper
+                .error(
+                    res,
+                    err
+                );
+
+        }
+
+    };    
 
 exports.getBusinessActions =
     async (req, res) => {

@@ -312,8 +312,66 @@ class ConfigurationService {
     }
 
     async getDropdownValues(
-        dropdownTypeId
+        dropdownTypeId,
+        query,
+        searchableColumns
     ) {
+
+        const where =
+            [
+                'dropdown_type_id = ?'
+            ];
+
+        const params =
+            [
+                dropdownTypeId
+            ];
+
+        if (
+            query.search
+        ) {
+
+            const searchClause =
+                searchableColumns
+                    .map(
+                        column =>
+                            `${column} LIKE ?`
+                    )
+                    .join(
+                        ' OR '
+                    );
+
+            where.push(
+                `(${searchClause})`
+            );
+
+            searchableColumns
+                .forEach(
+                    () =>
+                        params.push(
+                            `%${query.search}%`
+                        )
+                );
+
+        }
+
+        const whereClause =
+            where.join(
+                ' AND '
+            );
+
+        const [[{ total }]] =
+            await db.query(
+                `
+                SELECT
+                    COUNT(*) total
+                FROM
+                    configuration_dropdown_values
+                WHERE
+                    ${whereClause}
+                `,
+                params
+            );
 
         const [rows] =
             await db.query(
@@ -323,19 +381,28 @@ class ConfigurationService {
                 FROM
                     configuration_dropdown_values
                 WHERE
-                    dropdown_type_id = ?
+                    ${whereClause}
                 ORDER BY
-                    sort_order,
-                    name
+                    ${query.sort}
+                    ${query.direction}
+                LIMIT ?
+                OFFSET ?
                 `,
                 [
-                    dropdownTypeId
+                    ...params,
+                    query.pageSize,
+                    query.offset
                 ]
             );
 
-        return rows;
+        return {
+            rows,
+            total,
+            page: query.page,
+            pageSize: query.pageSize
+        };
 
-    } 
+    }
     
     async createDropdownValue(
         data
@@ -1035,6 +1102,69 @@ class ConfigurationService {
             connection.release();
 
         }
+
+    } 
+    
+    async setDefaultDropdownValue(
+        id
+    ) {
+
+        const [rows] =
+            await db.query(
+                `
+                SELECT
+                    id,
+                    dropdown_type_id
+                FROM
+                    configuration_dropdown_values
+                WHERE
+                    id = ?
+                `,
+                [
+                    id
+                ]
+            );
+
+        if (
+            rows.length === 0
+        ) {
+
+            throw new Error(
+                'Dropdown Value not found.'
+            );
+
+        }
+
+        const dropdownTypeId =
+            rows[0].dropdown_type_id;
+
+        await db.query(
+            `
+            UPDATE
+                configuration_dropdown_values
+            SET
+                is_default = 0
+            WHERE
+                dropdown_type_id = ?
+            `,
+            [
+                dropdownTypeId
+            ]
+        );
+
+        await db.query(
+            `
+            UPDATE
+                configuration_dropdown_values
+            SET
+                is_default = 1
+            WHERE
+                id = ?
+            `,
+            [
+                id
+            ]
+        );
 
     }    
 

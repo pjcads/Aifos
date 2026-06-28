@@ -107,5 +107,10 @@ router.put(
     configurationController.saveDropdownValueBusinessActions
 );
 
+router.put(
+    "/dropdown-values/:id/set-default",
+    configurationController.setDefaultDropdownValue
+);
+
 module.exports =
     router;
