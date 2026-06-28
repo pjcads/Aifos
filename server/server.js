@@ -29,6 +29,7 @@ const syncRoutes = require('./src/routes/syncRoutes');
 const terminalRoutes = require('./src/routes/terminalRoutes');
 const categoryRoutes = require('./src/routes/categoryRoutes');
 const priceRoutes = require('./src/routes/priceRoutes');
+const configurationRoutes = require('./src/routes/configurationRoutes');
 
 const authMiddleware = require('./src/middleware/authMiddleware');
 const roleMiddleware = require('./src/middleware/roleMiddleware');
@@ -55,6 +56,11 @@ app.get('/health', (req, res) => {
 app.use(
     '/api/terminals',
     terminalRoutes
+);
+
+app.use(
+    '/api/configuration',
+    configurationRoutes
 );
 
 /**

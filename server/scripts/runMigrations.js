@@ -3,6 +3,8 @@ const path = require('path');
 const mysql = require('mysql2/promise');
 
 const config = require('../src/config/config');
+const idGenerator =
+    require('../src/utils/idGenerator');
 
 async function runMigrations() {
 
@@ -77,7 +79,7 @@ async function runMigrations() {
                 `Applying ${file}`
             );
 
-            const sql =
+            let sql =
                 fs.readFileSync(
                     path.join(
                         migrationFolder,
@@ -85,6 +87,37 @@ async function runMigrations() {
                     ),
                     'utf8'
                 );
+
+            const placeholderMap =
+            {
+                CDT:
+                    () => idGenerator.configurationDropdownTypeId(),
+
+                CDV:
+                    () => idGenerator.configurationDropdownValueId(),
+
+                ACT:
+                    () => idGenerator.configurationBusinessActionId(),
+
+                DBA:
+                    () => idGenerator.configurationDropdownValueBusinessActionId()
+            };
+
+            for (
+                const prefix
+                in placeholderMap
+            )
+            {
+                sql =
+                    sql.replace(
+                        new RegExp(
+                            `\\{\\{${prefix}\\}\\}`,
+                            'g'
+                        ),
+                        () =>
+                            placeholderMap[prefix]()
+                    );
+            }
 
             await connection.query(
                 sql

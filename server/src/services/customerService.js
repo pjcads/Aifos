@@ -151,6 +151,51 @@ class CustomerService {
         status
     }) {
 
+        if (
+            !userId?.trim()
+        )
+        {
+            throw new Error(
+                'User ID is required.'
+            );
+        }
+
+        if (
+            !name?.trim()
+        )
+        {
+            throw new Error(
+                'Customer name is required.'
+            );
+        }
+
+        if (
+            !barcode?.trim()
+        )
+        {
+            throw new Error(
+                'Barcode is required.'
+            );
+        }
+
+        // if (
+        //     !department?.trim()
+        // )
+        // {
+        //     throw new Error(
+        //         'Department is required.'
+        //     );
+        // }
+
+        if (
+            !status?.trim()
+        )
+        {
+            throw new Error(
+                'Status is required.'
+            );
+        }        
+
         const customerId =
             idGenerator.customerId();
 
@@ -200,6 +245,51 @@ class CustomerService {
             status
         }
     ) {
+
+        if (
+            !userId?.trim()
+        )
+        {
+            throw new Error(
+                'User ID is required.'
+            );
+        }
+
+        if (
+            !name?.trim()
+        )
+        {
+            throw new Error(
+                'Customer name is required.'
+            );
+        }
+
+        if (
+            !barcode?.trim()
+        )
+        {
+            throw new Error(
+                'Barcode is required.'
+            );
+        }
+
+        // if (
+        //     !department?.trim()
+        // )
+        // {
+        //     throw new Error(
+        //         'Department is required.'
+        //     );
+        // }
+
+        if (
+            !status?.trim()
+        )
+        {
+            throw new Error(
+                'Status is required.'
+            );
+        }         
 
         const [rows] =
             await db.query(
@@ -329,7 +419,6 @@ class CustomerService {
         };
 
     }    
-
 }
 
 module.exports = new CustomerService();

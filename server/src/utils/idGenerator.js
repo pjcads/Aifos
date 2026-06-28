@@ -38,4 +38,9 @@ module.exports = {
     priceId: () => `PRI${ulid()}`,
 
     categoryId: () => `CAT${ulid()}`,
+
+    configurationDropdownTypeId: () => `CDT${ulid()}`,
+    configurationDropdownValueId: () => `CDV${ulid()}`,
+    configurationBusinessActionId: () => `ACT${ulid()}`,
+    configurationDropdownValueBusinessActionId: () => `DBA${ulid()}`,    
 };
