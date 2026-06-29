@@ -424,6 +424,60 @@ exports.setDefaultDropdownValue =
 
         }
 
+    };  
+    
+exports.moveUpDropdownValue =
+    async (req, res) => {
+
+        try {
+
+            await configurationService
+                .moveUpDropdownValue(
+                    req.params.id
+                );
+
+            return responseHelper
+                .success(
+                    res
+                );
+
+        } catch (err) {
+
+            return responseHelper
+                .error(
+                    res,
+                    err
+                );
+
+        }
+
+    };
+
+exports.moveDownDropdownValue =
+    async (req, res) => {
+
+        try {
+
+            await configurationService
+                .moveDownDropdownValue(
+                    req.params.id
+                );
+
+            return responseHelper
+                .success(
+                    res
+                );
+
+        } catch (err) {
+
+            return responseHelper
+                .error(
+                    res,
+                    err
+                );
+
+        }
+
     };    
 
 exports.getBusinessActions =

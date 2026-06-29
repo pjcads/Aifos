@@ -1166,6 +1166,252 @@ class ConfigurationService {
             ]
         );
 
+    }  
+    
+    async moveUpDropdownValue(
+        id
+    ) {
+
+        const connection =
+            await db.getConnection();
+
+        try {
+
+            await connection.beginTransaction();
+
+            const [currentRows] =
+                await connection.query(
+                    `
+                    SELECT
+                        id,
+                        dropdown_type_id,
+                        sort_order
+                    FROM
+                        configuration_dropdown_values
+                    WHERE
+                        id = ?
+                    `,
+                    [
+                        id
+                    ]
+                );
+
+            if (
+                currentRows.length === 0
+            ) {
+
+                throw new Error(
+                    'Dropdown Value not found.'
+                );
+
+            }
+
+            const current =
+                currentRows[0];
+
+            const [previousRows] =
+                await connection.query(
+                    `
+                    SELECT
+                        id,
+                        name,
+                        sort_order
+                    FROM
+                        configuration_dropdown_values
+                    WHERE
+                        dropdown_type_id = ?
+                        AND sort_order < ?
+                    ORDER BY
+                        sort_order DESC,
+                        name DESC
+                    LIMIT 1
+                    `,
+                    [
+                        current.dropdown_type_id,
+                        current.sort_order
+                    ]
+                );
+
+            if (
+                previousRows.length === 0
+            ) {
+
+                await connection.rollback();
+
+                return;
+
+            }
+
+            const previous =
+                previousRows[0];
+
+            await connection.query(
+                `
+                UPDATE
+                    configuration_dropdown_values
+                SET
+                    sort_order = ?
+                WHERE
+                    id = ?
+                `,
+                [
+                    previous.sort_order,
+                    current.id
+                ]
+            );
+
+            await connection.query(
+                `
+                UPDATE
+                    configuration_dropdown_values
+                SET
+                    sort_order = ?
+                WHERE
+                    id = ?
+                `,
+                [
+                    current.sort_order,
+                    previous.id
+                ]
+            );
+
+            await connection.commit();
+
+        } catch (err) {
+
+            await connection.rollback();
+
+            throw err;
+
+        } finally {
+
+            connection.release();
+
+        }
+
+    }    
+
+    async moveDownDropdownValue(
+        id
+    ) {
+
+        const connection =
+            await db.getConnection();
+
+        try {
+
+            await connection.beginTransaction();
+
+            const [currentRows] =
+                await connection.query(
+                    `
+                    SELECT
+                        id,
+                        dropdown_type_id,
+                        sort_order
+                    FROM
+                        configuration_dropdown_values
+                    WHERE
+                        id = ?
+                    `,
+                    [
+                        id
+                    ]
+                );
+
+            if (
+                currentRows.length === 0
+            ) {
+
+                throw new Error(
+                    'Dropdown Value not found.'
+                );
+
+            }
+
+            const current =
+                currentRows[0];
+
+            const [nextRows] =
+                await connection.query(
+                    `
+                    SELECT
+                        id,
+                        name,
+                        sort_order
+                    FROM
+                        configuration_dropdown_values
+                    WHERE
+                        dropdown_type_id = ?
+                        AND sort_order > ?
+                    ORDER BY
+                        sort_order ASC,
+                        name ASC
+                    LIMIT 1
+                    `,
+                    [
+                        current.dropdown_type_id,
+                        current.sort_order
+                    ]
+                );
+
+            if (
+                nextRows.length === 0
+            ) {
+
+                await connection.rollback();
+
+                return;
+
+            }
+
+            const next =
+                nextRows[0];
+
+            await connection.query(
+                `
+                UPDATE
+                    configuration_dropdown_values
+                SET
+                    sort_order = ?
+                WHERE
+                    id = ?
+                `,
+                [
+                    next.sort_order,
+                    current.id
+                ]
+            );
+
+            await connection.query(
+                `
+                UPDATE
+                    configuration_dropdown_values
+                SET
+                    sort_order = ?
+                WHERE
+                    id = ?
+                `,
+                [
+                    current.sort_order,
+                    next.id
+                ]
+            );
+
+            await connection.commit();
+
+        } catch (err) {
+
+            await connection.rollback();
+
+            throw err;
+
+        } finally {
+
+            connection.release();
+
+        }
+
     }    
 
 }

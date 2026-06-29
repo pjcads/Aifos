@@ -112,5 +112,15 @@ router.put(
     configurationController.setDefaultDropdownValue
 );
 
+router.put(
+    "/dropdown-values/:id/move-up",
+    configurationController.moveUpDropdownValue
+);
+
+router.put(
+    "/dropdown-values/:id/move-down",
+    configurationController.moveDownDropdownValue
+);
+
 module.exports =
     router;
