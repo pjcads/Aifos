@@ -56,9 +56,7 @@ class ConfigurationService {
                 WHERE 1 = 1
                 ${whereClause}
 
-                ORDER BY
-                    ${query.orderBy}
-                    ${query.direction}
+                ${query.orderBy}
 
                 LIMIT ?
 
@@ -382,9 +380,7 @@ class ConfigurationService {
                     configuration_dropdown_values
                 WHERE
                     ${whereClause}
-                ORDER BY
-                    ${query.sort}
-                    ${query.direction}
+                ${query.orderBy}
                 LIMIT ?
                 OFFSET ?
                 `,
@@ -723,9 +719,7 @@ class ConfigurationService {
                 WHERE 1 = 1
                 ${whereClause}
 
-                ORDER BY
-                    ${query.orderBy}
-                    ${query.direction}
+                ${query.orderBy}
 
                 LIMIT ?
 

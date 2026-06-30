@@ -2,9 +2,61 @@ const db = require('../../db');
 const idGenerator = require('../utils/idGenerator');
 const priceService = require('./priceService');
 
+const queryHelper =
+    require('../utils/queryHelper');
+
+const searchHelper =
+    require('../utils/searchHelper');
+
+const sortableColumns = {
+
+    sku:
+        'p.sku',
+
+    barcode:
+        'p.barcode',
+
+    name:
+        'p.name',
+
+    category:
+        'pc.category_name',
+
+    unit_of_measure:
+        'p.unit_of_measure',
+
+    is_active:
+        'p.is_active'
+
+};
+
+const searchableColumns = [
+
+    'p.sku',
+
+    'p.barcode',
+
+    'p.name',
+
+    'pc.category_name'
+
+];
+
 class ProductService {
 
-    async getProducts() {
+    async getProducts(req) {
+
+        const query =
+            queryHelper.build(
+                req,
+                sortableColumns
+            ); 
+            
+        const search =
+            searchHelper.build(
+                query.search,
+                searchableColumns
+            );            
 
         const [rows] =
             await db.query(
@@ -16,9 +68,34 @@ class ProductService {
                 FROM products p
                 LEFT JOIN product_categories pc
                     ON pc.id = p.category_id
-                ORDER BY p.name
-                `
+
+                ${search.where}
+
+                ${query.orderBy}
+
+                LIMIT ?
+                OFFSET ?
+                `,
+                [
+                    ...search.params,
+                    query.pageSize,
+                    query.offset
+                ]
             );
+
+        const [[{ total }]] =
+            await db.query(
+                `
+                SELECT
+                    COUNT(*) AS total
+                FROM products p
+                LEFT JOIN product_categories pc
+                    ON pc.id = p.category_id
+
+                ${search.where}
+                `,
+                search.params
+            );            
 
         const productIds =
             rows.map(
@@ -31,24 +108,40 @@ class ProductService {
                     productIds
                 );            
 
-        return rows.map(product => ({
+        const mappedRows =
+            rows.map(product => ({
 
-            ...product,
+                ...product,
 
-            current_price:
-                Number(
-                    priceMap[
-                        product.id
-                    ] || 0
-                ),
+                current_price:
+                    Number(
+                        priceMap[
+                            product.id
+                        ] || 0
+                    ),
 
-            is_active:
-                product.is_active === 1,
+                is_active:
+                    product.is_active === 1,
 
-            allow_negative_inventory:
-                product.allow_negative_inventory === 1
+                allow_negative_inventory:
+                    product.allow_negative_inventory === 1
 
-        }));
+            }));
+
+        return {
+
+            rows:
+                mappedRows,
+
+            total,
+
+            page:
+                query.page,
+
+            pageSize:
+                query.pageSize
+
+        };
 
     }
 

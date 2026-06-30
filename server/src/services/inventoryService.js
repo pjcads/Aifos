@@ -355,9 +355,7 @@ class InventoryService {
 
                 ${searchFilter.where}
 
-                ORDER BY
-                    ${query.orderBy}
-                    ${query.direction}
+                ${query.orderBy}
 
                 LIMIT ?
 
@@ -446,9 +444,7 @@ class InventoryService {
 
                 ${searchFilter.where}
 
-                ORDER BY
-                    ${query.orderBy}
-                    ${query.direction}
+                ${query.orderBy}
 
                 LIMIT ?
 

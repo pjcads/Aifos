@@ -45,13 +45,15 @@ class QueryHelper
                 : 'ASC';
 
         const orderBy =
-            sortableColumns[
-                sort
-            ]
-            ||
-            sortableColumns[
-                defaultSort
-            ];
+            `ORDER BY ${
+                sortableColumns[
+                    sort
+                ]
+                ||
+                sortableColumns[
+                    defaultSort
+                ]
+            } ${direction}`;
 
         const offset =
             (
@@ -64,7 +66,6 @@ class QueryHelper
             page,
             pageSize,
             sort,
-            direction,
             orderBy,
             offset
         };

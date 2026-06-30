@@ -8,6 +8,14 @@ class PriceService {
         productIds
     )
     {
+
+        if (
+            productIds.length === 0
+        )
+        {
+            return {};
+        }
+
         const [rows] =
             await db.query(
                 `

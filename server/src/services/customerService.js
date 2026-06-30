@@ -49,9 +49,7 @@ class CustomerService {
                 WHERE is_active = 1
                 ${whereClause}
 
-                ORDER BY
-                    ${query.orderBy}
-                    ${query.direction}
+                ${query.orderBy}
 
                 LIMIT ?
 

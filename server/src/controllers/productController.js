@@ -1,19 +1,22 @@
 const productService =
     require('../services/productService');
 
+const responseHelper =
+    require('../utils/responseHelper');    
+
 exports.getProducts =
     async (req, res) => {
 
         try {
 
-            const rows =
+            const result =
                 await productService
-                    .getProducts();
+                    .getProducts(req);
 
-            res.json({
-                success: true,
-                products: rows
-            });
+            responseHelper.successPaged(
+                res,
+                result
+            );
 
         } catch (err) {
 
