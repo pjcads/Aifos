@@ -6,6 +6,9 @@ const router =
 const controller =
     require('../controllers/productController');
 
+const uploadProductImage =
+    require('../middleware/uploadProductImage');    
+
 router.get(
     '/',
     controller.getProducts
@@ -24,6 +27,14 @@ router.post(
 router.put(
     '/:id',
     controller.updateProduct
+);
+
+router.post(
+    '/:id/image',
+    uploadProductImage.single(
+        'image'
+    ),
+    controller.uploadProductImage
 );
 
 module.exports = router;

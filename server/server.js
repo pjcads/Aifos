@@ -9,7 +9,8 @@ const cors = require('cors');
 
 const authRoutes = require('./src/routes/authRoutes');
 const productRoutes = require('./src/routes/productRoutes');
-const customerRoutes = require('./src/routes/customerRoutes');
+const customerRoutes = require('./src/routes/customerRoutes')
+const locationRoutes = require('./src/routes/locationRoutes');
 const userRoutes = require('./src/routes/userRoutes');
 const inventoryRoutes = require('./src/routes/inventoryRoutes');
 const negativeInventoryApprovalRoutes = require('./src/routes/negativeInventoryApprovalRoutes');
@@ -38,6 +39,11 @@ const app = express();
 
 app.use(cors());
 app.use(express.json());
+
+app.use(
+    '/uploads',
+    express.static('uploads')
+);
 
 /**
  * =========================
@@ -118,6 +124,12 @@ app.use(
    '/api/products',
    authMiddleware,
    productRoutes
+);
+
+app.use(
+    '/api/locations',
+    authMiddleware,
+    locationRoutes
 );
 
 app.use(

@@ -21,3 +21,16 @@ dist/
 # OS files
 .DS_Store
 Thumbs.db
+
+# Uploaded Files
+server/uploads/products/*
+!server/uploads/products/.gitkeep
+
+server/uploads/customers/*
+!server/uploads/customers/.gitkeep
+
+server/uploads/users/*
+!server/uploads/users/.gitkeep
+
+server/uploads/company/*
+!server/uploads/company/.gitkeep

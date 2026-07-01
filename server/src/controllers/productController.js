@@ -110,3 +110,34 @@ exports.updateProduct =
         }
 
     };
+
+exports.uploadProductImage =
+    async (req, res) => {
+
+        try {
+
+            const result =
+                await productService
+                    .uploadProductImage(
+                        req.params.id,
+                        req.file
+                    );
+
+            return responseHelper
+                .success(
+                    res,
+                    result
+                );
+
+        } catch (err) {
+
+            return responseHelper
+                .error(
+                    res,
+                    err,
+                    400
+                );
+
+        }
+
+    };    

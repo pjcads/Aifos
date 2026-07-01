@@ -391,6 +391,62 @@ class ProductService {
 
     }
 
+    async uploadProductImage(
+        productId,
+        file
+    )
+    {
+        const [rows] =
+            await db.query(
+                `
+                SELECT id
+                FROM products
+                WHERE id = ?
+                `,
+                [
+                    productId
+                ]
+            );
+
+        if (
+            rows.length === 0
+        )
+        {
+            throw new Error(
+                'Product not found'
+            );
+        }
+
+        if (
+            !file
+        )
+        {
+            throw new Error(
+                'No image uploaded.'
+            );
+        }
+
+        const imageUrl =
+            `/uploads/products/${file.filename}`;
+
+        await db.query(
+            `
+            UPDATE products
+            SET image_url = ?
+            WHERE id = ?
+            `,
+            [
+                imageUrl,
+                productId
+            ]
+        );
+
+        return {
+            productId,
+            imageUrl
+        };
+    }    
+
 }
 
 module.exports = new ProductService();
