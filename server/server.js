@@ -10,7 +10,6 @@ const cors = require('cors');
 const authRoutes = require('./src/routes/authRoutes');
 const productRoutes = require('./src/routes/productRoutes');
 const customerRoutes = require('./src/routes/customerRoutes')
-const locationRoutes = require('./src/routes/locationRoutes');
 const userRoutes = require('./src/routes/userRoutes');
 const inventoryRoutes = require('./src/routes/inventoryRoutes');
 const negativeInventoryApprovalRoutes = require('./src/routes/negativeInventoryApprovalRoutes');
@@ -124,12 +123,6 @@ app.use(
    '/api/products',
    authMiddleware,
    productRoutes
-);
-
-app.use(
-    '/api/locations',
-    authMiddleware,
-    locationRoutes
 );
 
 app.use(

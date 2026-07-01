@@ -20,8 +20,7 @@ const searchableColumns =
 [
     'code',
     'name',
-    'description',
-    'domain'
+    'description'
 ];  
 
 const dropdownValueSortableColumns =
