@@ -1,0 +1,11 @@
+ALTER TABLE configuration_dropdown_types
+ADD COLUMN parent_dropdown_type_id VARCHAR(30) NULL
+AFTER description;
+
+ALTER TABLE configuration_dropdown_types
+ADD CONSTRAINT fk_configuration_dropdown_types_parent
+FOREIGN KEY (parent_dropdown_type_id)
+REFERENCES configuration_dropdown_types(id);
+
+CREATE INDEX idx_configuration_dropdown_types_parent
+ON configuration_dropdown_types(parent_dropdown_type_id);

@@ -6,6 +6,11 @@ const controller =
     require('../controllers/transactionController');
 
 router.get(
+    '/',
+    controller.getTransactions
+);
+    
+router.get(
     '/id/:transactionId',
     controller.getTransaction
 );

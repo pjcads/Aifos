@@ -1,6 +1,38 @@
 const transactionService =
     require('../services/transactionService');
 
+exports.getTransactions =
+    async (req, res) => {
+
+        try {
+
+            const result =
+                await transactionService
+                    .getTransactions(req);
+
+            return res.json({
+                success: true,
+                total:
+                    result.total,
+                page:
+                    result.page,
+                pageSize:
+                    result.pageSize,
+                rows:
+                    result.rows
+            });
+
+        } catch (err) {
+
+            res.status(400).json({
+                success: false,
+                error: err.message
+            });
+
+        }
+
+    };
+
 exports.getTransaction =
     async (req, res) => {
 

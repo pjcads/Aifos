@@ -44,15 +44,25 @@ class ConfigurationService {
             await db.query(
                 `
                 SELECT
-                    id,
-                    code,
-                    name,
-                    description,
-                    is_system,
-                    is_active,
-                    created_at,
-                    updated_at
-                FROM configuration_dropdown_types
+                    dt.id,
+                    dt.code,
+                    dt.name,
+                    dt.description,
+                    dt.parent_dropdown_type_id,
+                    parent.code AS parent_dropdown_type_code,
+                    parent.name AS parent_dropdown_type_name,
+                    dt.display_order,
+                    dt.is_system,
+                    dt.is_active,
+                    dt.created_at,
+                    dt.updated_at
+                FROM
+                    configuration_dropdown_types dt
+
+                LEFT JOIN
+                    configuration_dropdown_types parent
+                        ON parent.id = dt.parent_dropdown_type_id
+
                 WHERE 1 = 1
                 ${whereClause}
 
@@ -85,9 +95,19 @@ class ConfigurationService {
         const [rows] =
             await db.query(
                 `
-                SELECT *
-                FROM configuration_dropdown_types
-                WHERE id = ?
+                SELECT
+                    dt.*,
+                    parent.code AS parent_dropdown_type_code,
+                    parent.name AS parent_dropdown_type_name
+                FROM
+                    configuration_dropdown_types dt
+
+                LEFT JOIN
+                    configuration_dropdown_types parent
+                        ON parent.id = dt.parent_dropdown_type_id
+
+                WHERE
+                    dt.id = ?
                 `,
                 [id]
             );
@@ -154,18 +174,22 @@ class ConfigurationService {
                 id,
                 code,
                 name,
-                description
+                description,
+                parent_dropdown_type_id,
+                display_order
             )
             VALUES
             (
-                ?, ?, ?, ?
+                ?, ?, ?, ?, ?, ?
             )
             `,
             [
                 id,
                 data.code.trim(),
                 data.name.trim(),
-                data.description?.trim() || null
+                data.description?.trim() || null,
+                data.parent_dropdown_type_id ?? null,
+                data.display_order ?? 0
             ]
         );
 
@@ -230,13 +254,17 @@ class ConfigurationService {
             SET
                 code = ?,
                 name = ?,
-                description = ?
+                description = ?,
+                parent_dropdown_type_id = ?,
+                display_order = ?
             WHERE id = ?
             `,
             [
                 data.code.trim(),
                 data.name.trim(),
                 data.description?.trim() || null,
+                data.parent_dropdown_type_id ?? null,
+                data.display_order ?? 0,
                 id
             ]
         );
@@ -317,7 +345,7 @@ class ConfigurationService {
 
         const where =
             [
-                'dropdown_type_id = ?'
+                'dv.dropdown_type_id = ?'
             ];
 
         const params =
@@ -364,7 +392,7 @@ class ConfigurationService {
                 SELECT
                     COUNT(*) total
                 FROM
-                    configuration_dropdown_values
+                    configuration_dropdown_values dv
                 WHERE
                     ${whereClause}
                 `,
@@ -375,13 +403,23 @@ class ConfigurationService {
             await db.query(
                 `
                 SELECT
-                    *
+                    dv.*,
+                    parent.code AS parent_code,
+                    parent.name AS parent_name
                 FROM
-                    configuration_dropdown_values
+                    configuration_dropdown_values dv
+
+                LEFT JOIN
+                    configuration_dropdown_values parent
+                        ON parent.id = dv.parent_dropdown_value_id
+
                 WHERE
                     ${whereClause}
+
                 ${query.orderBy}
+
                 LIMIT ?
+
                 OFFSET ?
                 `,
                 [
@@ -399,6 +437,96 @@ class ConfigurationService {
         };
 
     }
+
+    async getDropdownValuesLookup(
+        query
+    ) {
+
+        const where =
+            [];
+
+        const params =
+            [];
+
+        if (
+            query.dropdownTypeCode
+        ) {
+
+            where.push(
+                `
+                dv.dropdown_type_id =
+                (
+                    SELECT id
+                    FROM configuration_dropdown_types
+                    WHERE code = ?
+                )
+                `
+            );
+
+            params.push(
+                query.dropdownTypeCode
+            );
+
+        }
+        else if (
+            query.dropdownTypeId
+        ) {
+
+            where.push(
+                "dv.dropdown_type_id = ?"
+            );
+
+            params.push(
+                query.dropdownTypeId
+            );
+
+        }
+
+        if (
+            query.parentDropdownValueId
+        ) {
+
+            where.push(
+                "dv.parent_dropdown_value_id = ?"
+            );
+
+            params.push(
+                query.parentDropdownValueId
+            );
+
+        }
+
+        const whereClause =
+            where.length > 0
+                ? `WHERE ${where.join(" AND ")}`
+                : "";
+
+        const [rows] =
+            await db.query(
+                `
+                SELECT
+                    dv.*,
+                    parent.code AS parent_code,
+                    parent.name AS parent_name
+                FROM
+                    configuration_dropdown_values dv
+
+                LEFT JOIN
+                    configuration_dropdown_values parent
+                        ON parent.id = dv.parent_dropdown_value_id
+
+                ${whereClause}
+
+                ORDER BY
+                    dv.sort_order,
+                    dv.name
+                `,
+                params
+            );
+
+        return rows;
+
+    }    
     
     async createDropdownValue(
         data
@@ -443,6 +571,7 @@ class ConfigurationService {
             (
                 id,
                 dropdown_type_id,
+                parent_dropdown_value_id,
                 code,
                 name,
                 description,
@@ -453,12 +582,13 @@ class ConfigurationService {
             )
             VALUES
             (
-                ?, ?, ?, ?, ?, ?, ?, ?, ?
+                ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
             )
             `,
             [
                 id,
                 data.dropdown_type_id,
+                data.parent_dropdown_value_id ?? null,
                 data.code.trim(),
                 data.name.trim(),
                 data.description ?? null,
@@ -579,6 +709,7 @@ class ConfigurationService {
             `
             UPDATE configuration_dropdown_values
             SET
+                parent_dropdown_value_id = ?,
                 code = ?,
                 name = ?,
                 description = ?,
@@ -588,6 +719,7 @@ class ConfigurationService {
                 id = ?
             `,
             [
+                data.parent_dropdown_value_id ?? null,
                 data.code.trim(),
                 data.name.trim(),
                 data.description?.trim() || null,

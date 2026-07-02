@@ -48,6 +48,11 @@ router.post(
 );
 
 router.get(
+    '/dropdown-values',
+    configurationController.getDropdownValuesLookup
+);
+
+router.get(
     '/dropdown-values/:id',
     configurationController.getDropdownValue
 );

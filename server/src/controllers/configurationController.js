@@ -477,6 +477,37 @@ exports.moveDownDropdownValue =
 
         }
 
+    };   
+    
+exports.getDropdownValuesLookup =
+    async (req, res) => {
+
+        try {
+
+            const rows =
+                await configurationService
+                    .getDropdownValuesLookup(
+                        req.query
+                    );
+
+            return responseHelper
+                .success(
+                    res,
+                    {
+                        rows
+                    }
+                );
+
+        } catch (err) {
+
+            return responseHelper
+                .error(
+                    res,
+                    err
+                );
+
+        }
+
     };    
 
 exports.getBusinessActions =
