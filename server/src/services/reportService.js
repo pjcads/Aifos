@@ -2,6 +2,195 @@ const db = require('../../db');
 
 class ReportService {
 
+    constructor()
+    {
+
+        this.reportHandlers =
+        {
+            SALES_SUMMARY:
+                this.getSalesSummaryReport.bind(
+                    this
+                ),
+
+            PRODUCT_SALES:
+                this.getProductSalesReport.bind(
+                    this
+                ),
+
+            INVENTORY_MOVEMENT:
+                this.getInventoryMovementReport.bind(
+                    this
+                ),
+
+            INVENTORY_VALUATION:
+                this.getInventoryValuationReport.bind(
+                    this
+                ),
+
+            PAYMENT_METHOD:
+                this.getPaymentMethodReport.bind(
+                    this
+                ),
+
+            ORDER_PERFORMANCE:
+                this.getOrderPerformanceReport.bind(
+                    this
+                )
+        };
+
+    }
+
+    async getReportMetadata(
+        reportCode
+    ) {
+
+        const [rows] =
+            await db.query(
+                `
+                SELECT
+                    report.code,
+                    report.name,
+                    parent.code AS group_code,
+                    parent.name AS group_name
+                FROM
+                    configuration_dropdown_values report
+
+                INNER JOIN
+                    configuration_dropdown_types dt
+                        ON dt.id =
+                            report.dropdown_type_id
+
+                LEFT JOIN
+                    configuration_dropdown_values parent
+                        ON parent.id =
+                            report.parent_dropdown_value_id
+
+                WHERE
+                    dt.code = 'REPORTS'
+                    AND report.code = ?
+
+                LIMIT 1
+                `,
+                [
+                    reportCode
+                ]
+            );
+
+        if (
+            rows.length === 0
+        ) {
+
+            throw new Error(
+                `Report '${reportCode}' is not registered.`
+            );
+
+        }
+
+        return rows[0];
+
+    }    
+
+    async getReports()
+    {
+
+        const [rows] =
+            await db.query(
+                `
+                SELECT
+                    dv.id,
+                    dv.code,
+                    dv.name,
+                    dv.description,
+                    parent.code AS report_group_code,
+                    parent.name AS report_group_name,
+                    dv.sort_order
+                FROM
+                    configuration_dropdown_values dv
+
+                INNER JOIN
+                    configuration_dropdown_types dt
+                        ON dt.id =
+                            dv.dropdown_type_id
+
+                LEFT JOIN
+                    configuration_dropdown_values parent
+                        ON parent.id =
+                            dv.parent_dropdown_value_id
+
+                WHERE
+                    dt.code = 'REPORTS'
+                    AND dv.is_active = 1
+
+                ORDER BY
+                    parent.sort_order,
+                    dv.sort_order,
+                    dv.name
+                `
+            );
+
+        return rows;
+
+    }
+
+    async runReport(
+        request
+    ) {
+
+        const handler =
+            this.reportHandlers[
+                request.reportCode
+            ];
+
+        if (
+            !handler
+        ) {
+
+            throw new Error(
+                `Unknown report '${request.reportCode}'.`
+            );
+
+        }
+
+        const metadata =
+            await this.getReportMetadata(
+                request.reportCode
+            );
+
+        const result =
+            await handler(
+                request.filters
+            );
+
+        return {
+
+            code:
+                metadata.code,
+
+            title:
+                metadata.name,
+
+            group:
+            {
+                code:
+                    metadata.group_code,
+
+                title:
+                    metadata.group_name
+            },
+
+            columns:
+                result.columns,
+
+            rows:
+                result.rows,
+
+            summary:
+                result.summary ?? {}
+
+        };
+
+    }
+
     async getProductSalesReport({
         fromDate,
         toDate
@@ -110,8 +299,8 @@ class ReportService {
                 ]
             );
 
-        return {
-
+        const summary =
+        {
             salesCount:
                 Number(
                     sales.sales_count
@@ -140,10 +329,51 @@ class ReportService {
                 Number(
                     refunds.refund_amount
                 )
+        };
+
+        return {
+
+            columns:
+            [
+                {
+                    field: "metric",
+                    caption: "Metric"
+                },
+                {
+                    field: "value",
+                    caption: "Value"
+                }
+            ],
+
+            rows:
+            [
+                {
+                    metric: "Sales Count",
+                    value: summary.salesCount
+                },
+                {
+                    metric: "Sales Amount",
+                    value: summary.salesAmount
+                },
+                {
+                    metric: "Refund Count",
+                    value: summary.refundCount
+                },
+                {
+                    metric: "Refund Amount",
+                    value: summary.refundAmount
+                },
+                {
+                    metric: "Net Sales",
+                    value: summary.netSales
+                }
+            ],
+
+            summary
 
         };
 
-    }    
+    }
 
     async getInventoryMovementReport({
         fromDate,

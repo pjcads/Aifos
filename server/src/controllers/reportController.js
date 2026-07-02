@@ -1,5 +1,76 @@
-const reportService = require('../services/reportService');
-const exportService = require('../services/exportService');
+const reportService =
+    require('../services/reportService');
+
+const responseHelper =
+    require('../utils/responseHelper');
+
+exports.getReports =
+    async (req, res) => {
+
+        try {
+
+            const rows =
+                await reportService
+                    .getReports();
+
+            return responseHelper
+                .success(
+                    res,
+                    {
+                        rows
+                    }
+                );
+
+        } catch (err) {
+
+            return responseHelper
+                .error(
+                    res,
+                    err
+                );
+
+        }
+
+    };
+
+exports.runReport =
+    async (req, res) => {
+
+        try {
+
+            const report =
+                await reportService
+                    .runReport(
+                        req.body
+                    );
+
+            return responseHelper
+                .success(
+                    res,
+                    {
+                        report
+                    }
+                );
+
+        } catch (err) {
+
+            return responseHelper
+                .error(
+                    res,
+                    err
+                );
+
+        }
+
+    };
+
+/*
+========================================================================
+OLD REPORT METHODS
+Move the existing methods below this comment temporarily.
+We will migrate them one-by-one into the new generic engine.
+========================================================================
+*/
 
 exports.getProductSalesReport =
     async (req, res) => {

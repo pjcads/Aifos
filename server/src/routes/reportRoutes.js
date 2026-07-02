@@ -1,4 +1,5 @@
-const express = require('express');
+const express =
+    require('express');
 
 const router =
     express.Router();
@@ -7,38 +8,14 @@ const controller =
     require('../controllers/reportController');
 
 router.get(
-    '/products/export',
-    controller.exportProductSalesReport
-);
-    
-router.get(
-    '/products',
-    controller.getProductSalesReport
+    '/',
+    controller.getReports
 );
 
-router.get(
-    '/sales',
-    controller.getSalesSummaryReport
+router.post(
+    '/run',
+    controller.runReport
 );
 
-router.get(
-    '/inventory/movement',
-    controller.getInventoryMovementReport
-);
-
-router.get(
-    '/inventory/valuation',
-    controller.getInventoryValuationReport
-);
-
-router.get(
-    '/payments',
-    controller.getPaymentMethodReport
-);
-
-router.get(
-    '/orders/performance',
-    controller.getOrderPerformanceReport
-);
-
-module.exports = router;
+module.exports =
+    router;
